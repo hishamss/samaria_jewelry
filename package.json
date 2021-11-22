@@ -7,6 +7,7 @@
     "start": "node ./api/dist/server.js",
     "client-build": "cd ./client && npm run build ",
     "api-build": "cd ./api && tsc",
+    "install": "cd ./client && npm install && cd ./api && npm install",
     "heroku-postbuild": "npm run client-build && npm run api-build && mv -i -v ./client/build ./api/dist/build ",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
