@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/samaria_jewelry/static/css/main.16884ee1.chunk.css",
+    "main.js": "/samaria_jewelry/static/js/main.a7d1b89f.chunk.js",
+    "main.js.map": "/samaria_jewelry/static/js/main.a7d1b89f.chunk.js.map",
+    "runtime-main.js": "/samaria_jewelry/static/js/runtime-main.d9bdacef.js",
+    "runtime-main.js.map": "/samaria_jewelry/static/js/runtime-main.d9bdacef.js.map",
+    "static/css/2.383c0125.chunk.css": "/samaria_jewelry/static/css/2.383c0125.chunk.css",
+    "static/js/2.69d7827e.chunk.js": "/samaria_jewelry/static/js/2.69d7827e.chunk.js",
+    "static/js/2.69d7827e.chunk.js.map": "/samaria_jewelry/static/js/2.69d7827e.chunk.js.map",
+    "index.html": "/samaria_jewelry/index.html",
+    "static/css/2.383c0125.chunk.css.map": "/samaria_jewelry/static/css/2.383c0125.chunk.css.map",
+    "static/css/main.16884ee1.chunk.css.map": "/samaria_jewelry/static/css/main.16884ee1.chunk.css.map",
+    "static/js/2.69d7827e.chunk.js.LICENSE.txt": "/samaria_jewelry/static/js/2.69d7827e.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.d9bdacef.js",
+    "static/css/2.383c0125.chunk.css",
+    "static/js/2.69d7827e.chunk.js",
+    "static/css/main.16884ee1.chunk.css",
+    "static/js/main.a7d1b89f.chunk.js"
+  ]
+}

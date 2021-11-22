@@ -1,0 +1,38 @@
+.fa-shopping-cart {
+    color: #3A3E40;
+    font-size: 35px;
+}
+
+.fa-shopping-cart:hover {
+    color: #81D8D0 !important;
+}
+
+.nav_links {
+    color: #3A3E40;
+    font-size: 20px;
+    font-family: 'Lustria', serif;
+    margin-right: 15px;
+    text-decoration: none;
+    border: .5px solid transparent;
+    border-radius: 1px;
+}
+
+.nav_links:hover {
+    border: .5px solid #81D8D0;
+    color: #3A3E40;
+    border-radius: 3px;
+}
+
+.selected {
+    color: #81D8D0 !important;
+}
+#logo {
+    position: absolute;
+    left: calc(50% - 100px);
+}
+
+#cart {
+    position: absolute;
+    right: 0;
+}
+
