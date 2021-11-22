@@ -2,10 +2,11 @@
   "name": "api",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "web": "server.js",
+  "main": "server.js",
   "scripts": {
-    "start": "ts-node-dev --respawn server.ts",
+    "start": "node dist/server.js",
+    "postinstall": "tsc",
+    "dev": "ts-node-dev --respawn server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
