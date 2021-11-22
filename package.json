@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node ./api/dist/server.js",
     "client-build": "cd ./client && npm run build ",
-    "api-build": "cd ./api && tsc",
+    "tsc": "tsc",
+    "api-build": "cd ./api && npm run tsc",
     "install-client-dep": "cd ./client && npm install",
     "install-api-dep": "cd ./api && npm install",
     "install": "npm run install-client-dep && npm run install-api-dep",
