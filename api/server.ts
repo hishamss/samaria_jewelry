@@ -1,11 +1,17 @@
 import express from "express";
+import routes from "./routes";
 
 const app = express();
-const port = 5000;
+const PORT =  process.env.PORT || 3001;
 
-app.get("/", (req, res) => {
-    res.json({
-        "name": "hisham"
-    })
-})
-app.listen(port, () => console.log(`express is listning on port ${port}`));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+// Serve up static assets (usually on heroku)
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static("client/build"));
+}
+
+app.use(routes);
+
+
+app.listen(PORT, () => console.log(`Listning on port ${PORT}`));

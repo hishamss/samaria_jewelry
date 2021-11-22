@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Carousel, Container, Row, Col, Modal } from "react-bootstrap";
 import { Item } from "../../types";
-import Items from "../../items.json";
+import {getStoreItems} from "../../utils/api"
 import "./index.css";
 
 
@@ -24,7 +24,11 @@ const Shop = () => {
     setNumOfOtherImages(item.numOfOtherImage);
   }
 
-  useEffect(() => { setStoreItems(Items) }, []);
+  useEffect(() => { 
+    getStoreItems().then(result => {
+      setStoreItems(result);
+    })
+   }, []);
 
   return <div>
     <div className="container-fluid shop-header">Welcome to Samaria Jewelry</div>

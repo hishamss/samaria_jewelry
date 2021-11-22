@@ -4,7 +4,7 @@
         "name": "Item1",
         "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy",
         "quantity": 3,
-        "price": 19.99,
+        "price": 29.99,
         "numOfOtherImage": 3 
     },
     {
