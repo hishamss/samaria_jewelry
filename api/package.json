@@ -4,9 +4,6 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node dist/server.js",
-    "client-build": "cd ../client && npm run build ",
-    "heroku-postbuild": "npm run client-build && tsc && mv -i -v ../client/build dist/build ",
     "dev": "ts-node-dev --respawn server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
