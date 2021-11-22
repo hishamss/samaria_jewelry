@@ -1,0 +1,24 @@
+{
+  "name": "samaria_jewelry",
+  "version": "1.0.0",
+  "description": "Online Jewelry store",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./api/dist/server.js",
+    "client-build": "cd ./client && npm run build ",
+    "api-build": "cd ./api && tsc",
+    "heroku-postbuild": "npm run client-build && npm run api-build && mv -i -v ./client/build ./api/dist/build ",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hishamss/samaria_jewelry.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hishamss/samaria_jewelry/issues"
+  },
+  "homepage": "https://github.com/hishamss/samaria_jewelry#readme"
+}
