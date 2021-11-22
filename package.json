@@ -9,7 +9,7 @@
     "api-build": "cd ./api && tsc",
     "install-client-dep": "cd ./client && npm install",
     "install-api-dep": "cd ./api && npm install",
-    "install": "install-client-dep && install-api-dep",
+    "install": "npm run install-client-dep && npm run install-api-dep",
     "heroku-postbuild": "npm run client-build && npm run api-build && mv -i -v ./client/build ./api/dist/build ",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
