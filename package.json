@@ -7,12 +7,12 @@
     "start": "node ./backend/dist/server.js",
     "client-build": "cd ./client && npm run build ",
     "tsc": "tsc",
-    "backend-build": "cd ./backend && npm run tsc",
+    "backend-build": "cd ./backend && tsc",
     "install-client-dep": "cd ./client && npm install",
     "install-api-dep": "cd ./backend && npm install",
     "install": "npm run install-client-dep && npm run install-api-dep",
-    "move-build": "mv -i -v ./client/build ./backend/dist/",
-    "heroku-postbuild": "npm run client-build && npm run api-build &&  npm run move-build",
+    "move-build": "mv -i -v ./client/build ./backend/dist/build",
+    "heroku-postbuild": "npm run client-build && npm run backend-build &&  npm run move-build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
