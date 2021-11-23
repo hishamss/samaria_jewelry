@@ -7,7 +7,7 @@
     "start": "node ./backend/dist/server.js",
     "client-build": "cd ./client && npm run build ",
     "tsc": "tsc",
-    "backend-build": "cd ./backend && tsc",
+    "backend-build": "cd ./backend && npm run tsc",
     "install-client-dep": "cd ./client && npm install",
     "install-api-dep": "cd ./backend && npm install",
     "install": "npm run install-client-dep && npm run install-api-dep",
