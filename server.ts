@@ -1,8 +1,9 @@
 import express from "express";
 import path from "path";
 import routes from "./routes";
-import * as dotenv from "dotenv";
-dotenv.config();
+import db from "./models";
+
+
 const app = express();
 const PORT =  process.env.PORT || 3001;
 
@@ -20,5 +21,15 @@ if(process.env.NODE_ENV === 'production') {
 
 app.use(routes);
 
+const startApp = async() => {
+    try {
+        await db.sequelize.sync({force:true}).then(() => {
+            app.listen(PORT, () => console.log(`Listning on port ${PORT}`));
+        });
+    }catch(err) {
+        console.log(err);
+    }
+    
+};
 
-app.listen(PORT, () => console.log(`Listning on port ${PORT}`, process.env.DB_PASS));
+startApp();

@@ -6,4 +6,3 @@ export interface Item {
     price: number,
     numOfOtherImage: number,
 }
-
