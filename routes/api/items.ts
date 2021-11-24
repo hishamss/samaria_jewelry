@@ -1,9 +1,11 @@
 import {Router} from "express";
-import Items from "../../items.json";
+import {Item} from "../../models/Item"
 const itemsRouter = Router();
 
 itemsRouter.route("/").get((req, res) => {
-    res.json(Items);
+    Item.findAll()
+    .then(items => res.json(items))
+    .catch(e => console.log(e))
 })
 
 export default itemsRouter;
