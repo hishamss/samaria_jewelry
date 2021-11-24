@@ -10,6 +10,10 @@ if(process.env.NODE_ENV === 'production') {
   routes.use((req, res) => {
     res.sendFile(path.join(__dirname, "../client/build", "index.html"));
   });
+  }else {
+    routes.use((req, res) => {
+      res.redirect("http://localhost:3000");
+    })
   }
 
 export default routes;
