@@ -1,3 +1,5 @@
+// this is used by sequelize-cli to run seeder script - 
+// not used by the app logic
 require("dotenv").config();
 
 module.exports = {

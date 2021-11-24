@@ -1,3 +1,19 @@
+// Create seed in seeders folder:
+// npx sequelize-cli seed:generate --name demo-item
+
+// populate all seeds js files under seeders directory in DB:
+// npx sequelize-cli db:seed:all
+
+
+// populate specific seed js file under seeders directory in DB:
+// npx sequelize-cli db:seed --seed [seed file name]
+// Ex: newItem.js
+// npx sequelize-cli db:seed --seed newItem
+
+
+// Undo all seeds:
+// npx sequelize-cli db:seed:undo:all
+
 'use strict';
 
 module.exports = {
