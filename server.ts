@@ -15,9 +15,7 @@ app.use(express.json());
     await sequelize.sync();
     app.listen(PORT, () => console.log(`Listning on port ${PORT}`));
 })();
-if(process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../client/build')));
-}
+
 
 
 app.use(routes);
