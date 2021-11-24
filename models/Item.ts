@@ -1,12 +1,25 @@
-import { Table, Column, Model } from 'sequelize-typescript'
+import { Table, Column, Model, AllowNull } from 'sequelize-typescript'
 
 @Table
 export class Item extends Model {
-  @Column name!: string; 
-  @Column description!: string;
-  @Column quantity!: number;
-  @Column price!: number;
-  @Column numOfOtherImage!: number;
 
-  
+    @AllowNull(false)
+    @Column name!: string;
+
+
+    @Column description!: string;
+
+
+    @AllowNull(false)
+    @Column quantity!: number;
+
+
+    @AllowNull(false)
+    @Column price!: number;
+
+
+    @AllowNull(false)
+    @Column numOfOtherImage!: number;
+
+
 }
