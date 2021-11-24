@@ -12,22 +12,22 @@ module.exports = (sequelize:any, DataTypes:any) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    id!: string;
+    id!: number;
     name!: string;
     description!: string | null;
     quantity!: number;
     price!: number;
-    numOfOtherImages!:number;
+    numOfOtherImage!:number;
     static associate(models:any) {
       // define association here
     }
   };
   Item.init({
     id: {
-      type: DataTypes.UUID,
-      defaultValue: UUIDV4,
+      type: DataTypes.INTEGER,
       allowNull: false,
-      primaryKey: true
+      primaryKey: true,
+      autoIncrement: true,
 
     },
     name: {
@@ -43,7 +43,7 @@ module.exports = (sequelize:any, DataTypes:any) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    numOfOtherImages: {
+    numOfOtherImage: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },

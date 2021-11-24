@@ -3,7 +3,6 @@ import path from "path";
 import routes from "./routes";
 import db from "./models";
 
-
 const app = express();
 const PORT =  process.env.PORT || 3001;
 
@@ -25,6 +24,7 @@ const startApp = async() => {
     try {
         await db.sequelize.sync({force:true}).then(() => {
             app.listen(PORT, () => console.log(`Listning on port ${PORT}`));
+            
         });
     }catch(err) {
         console.log(err);
@@ -32,4 +32,6 @@ const startApp = async() => {
     
 };
 
+
 startApp();
+
