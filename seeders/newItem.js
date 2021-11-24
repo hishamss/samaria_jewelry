@@ -21,7 +21,6 @@ module.exports = {
 
     await queryInterface.bulkInsert('Items', [
       {
-        id: 8,
         name: "Item8",
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy",
         quantity: 3,

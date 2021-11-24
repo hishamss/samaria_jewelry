@@ -1,8 +1,15 @@
 // Create seed in seeders folder:
 // npx sequelize-cli seed:generate --name demo-item
 
-// populate data in DB:
+// populate all seeds js files under seeders directory in DB:
 // npx sequelize-cli db:seed:all
+
+
+// populate specific seed js file under seeders directory in DB:
+// npx sequelize-cli db:seed --seed [seed file name]
+// Ex: newItem.js
+// npx sequelize-cli db:seed --seed newItem
+
 
 // Undo all seeds:
 // npx sequelize-cli db:seed:undo:all
@@ -10,11 +17,11 @@
 'use strict';
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
+  up: async (queryInterface,Sequelize) => {
 
     await queryInterface.bulkInsert('Items', [
       {
-        id: 1,
+  
         name: "Item1",
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy",
         quantity: 3,
@@ -22,7 +29,7 @@ module.exports = {
         numOfOtherImage: 3
       },
       {
-        id: 2,
+     
         name: "Item2",
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
         quantity: 5,
@@ -30,7 +37,7 @@ module.exports = {
         numOfOtherImage: 3
       },
       {
-        id: 3,
+  
         name: "Item3",
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy",
         quantity: 7,
@@ -38,7 +45,7 @@ module.exports = {
         numOfOtherImage: 3
       },
       {
-        id: 4,
+      
         name: "Item4",
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's.",
         quantity: 11,
@@ -46,7 +53,7 @@ module.exports = {
         numOfOtherImage: 3
       },
       {
-        id: 5,
+    
         name: "Item5",
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem 5.",
         quantity: 13,
@@ -54,7 +61,7 @@ module.exports = {
         numOfOtherImage: 2
       },
       {
-        id: 6,
+      
         name: "Item6",
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem 5.",
         quantity: 18,
@@ -62,7 +69,7 @@ module.exports = {
         numOfOtherImage: 2
       },
       {
-        id: 7,
+   
         name: "Item7",
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem 5.",
         quantity: 19,
