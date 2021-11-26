@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Carousel, Container, Row, Col, Modal, Dropdown } from "react-bootstrap";
-import { Item } from "../../types";
+import { Item, Sizes } from "../../types";
 import { getStoreItems } from "../../utils/api"
 import "./index.css";
 
@@ -15,7 +15,7 @@ const Shop = () => {
   const [itemDescription, setItemDescription] = useState("");
   const [itemPrice, setItemPrice] = useState<number>();
   const [numOfOtherImages, setNumOfOtherImages] = useState<number>();
-  const [sizes, setSizes] = useState<string | null>();
+  const [sizes, setSizes] = useState<Sizes | null>();
   const showItemDetails = (item: Item) => {
     setShow(true);
     setItemId(item.id);
@@ -23,7 +23,8 @@ const Shop = () => {
     setItemDescription(item.description);
     setItemPrice(item.price);
     setNumOfOtherImages(item.numOfOtherImage);
-    setSizes(item.sizes);
+    item.sizes ? setSizes(JSON.parse(item.sizes)) : setSizes(null);
+    console.log(JSON.parse((item.sizes)!));
   }
 
   useEffect(() => {
@@ -106,7 +107,10 @@ const Shop = () => {
               Select Size
             </Dropdown.Toggle>
             <Dropdown.Menu>
-            {Object.keys(JSON.parse(sizes)).map(size => <Dropdown.Item href="#/action-3">{size}</Dropdown.Item>)}
+
+              {Object.keys(sizes).map(size => sizes[size] !== 0 ? <Dropdown.Item href="#/action-3">{size}</Dropdown.Item> : null
+
+              )}
             </Dropdown.Menu>
           </Dropdown> : null}
         <p className="item-description mb-3">{itemDescription}</p>

@@ -8,3 +8,6 @@ export interface Item {
     sizes: string | null,
 }
 
+export interface Sizes {
+    [key: string]: number
+  }
