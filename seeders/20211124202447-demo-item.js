@@ -15,7 +15,6 @@
 // npx sequelize-cli db:seed:undo:all
 
 'use strict';
-
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert('Items', [
@@ -25,7 +24,8 @@ module.exports = {
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy",
         quantity: 3,
         price: 29.99,
-        numOfOtherImage: 3
+        numOfOtherImage: 3,
+        sizes: null
       },
       {
      
@@ -33,7 +33,8 @@ module.exports = {
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
         quantity: 5,
         price: 29.99,
-        numOfOtherImage: 3
+        numOfOtherImage: 3,
+        sizes: null
       },
       {
   
@@ -41,7 +42,8 @@ module.exports = {
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy",
         quantity: 7,
         price: 49.99,
-        numOfOtherImage: 3
+        numOfOtherImage: 3,
+        sizes: JSON.stringify({4:3, 2:2})
       },
       {
       
@@ -49,7 +51,8 @@ module.exports = {
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's.",
         quantity: 11,
         price: 89.99,
-        numOfOtherImage: 3
+        numOfOtherImage: 3,
+        sizes: JSON.stringify({7:3,9:2})
       },
       {
     
@@ -57,7 +60,8 @@ module.exports = {
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem 5.",
         quantity: 13,
         price: 79.99,
-        numOfOtherImage: 2
+        numOfOtherImage: 2,
+        sizes: null
       },
       {
       
@@ -65,7 +69,8 @@ module.exports = {
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem 5.",
         quantity: 18,
         price: 59.99,
-        numOfOtherImage: 2
+        numOfOtherImage: 2,
+        sizes: null
       },
       {
    
@@ -73,7 +78,8 @@ module.exports = {
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem 5.",
         quantity: 19,
         price: 49.99,
-        numOfOtherImage: 2
+        numOfOtherImage: 2,
+        sizes: null
       }
     ])
 

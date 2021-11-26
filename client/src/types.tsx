@@ -5,5 +5,6 @@ export interface Item {
     quantity: number,
     price: number,
     numOfOtherImage: number,
+    sizes: string | null,
 }
 

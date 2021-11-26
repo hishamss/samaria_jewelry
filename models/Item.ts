@@ -21,5 +21,6 @@ export class Item extends Model {
     @AllowNull(false)
     @Column numOfOtherImage!: number;
 
+    @Column sizes!: string;    
 
 }

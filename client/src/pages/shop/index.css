@@ -44,7 +44,7 @@
     font-weight: bold;
 }
 
-.add-to-cart-btn {
+.add-to-cart-btn  {
     background: #3A3E40;
     font-family: 'Lustria', serif;
     color: white;
@@ -57,4 +57,15 @@
 
 .add-to-cart-btn:hover {
     background: #81D8D0;
+}
+
+.sizes-menu button {
+    background: #3A3E40 !important;
+    font-family: 'Lustria', serif;
+    color: white;
+    border: 0;
+}
+
+.sizes-menu button:hover {
+    background: #81D8D0 !important;
 }

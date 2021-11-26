@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Carousel, Container, Row, Col, Modal } from "react-bootstrap";
+import { Carousel, Container, Row, Col, Modal, Dropdown } from "react-bootstrap";
 import { Item } from "../../types";
-import {getStoreItems} from "../../utils/api"
+import { getStoreItems } from "../../utils/api"
 import "./index.css";
 
 
@@ -15,6 +15,7 @@ const Shop = () => {
   const [itemDescription, setItemDescription] = useState("");
   const [itemPrice, setItemPrice] = useState<number>();
   const [numOfOtherImages, setNumOfOtherImages] = useState<number>();
+  const [sizes, setSizes] = useState<string | null>();
   const showItemDetails = (item: Item) => {
     setShow(true);
     setItemId(item.id);
@@ -22,13 +23,14 @@ const Shop = () => {
     setItemDescription(item.description);
     setItemPrice(item.price);
     setNumOfOtherImages(item.numOfOtherImage);
+    setSizes(item.sizes);
   }
 
-  useEffect(() => { 
+  useEffect(() => {
     getStoreItems().then(result => {
       setStoreItems(result);
     })
-   }, []);
+  }, []);
 
   return <div>
     <div className="container-fluid shop-header">Welcome to Samaria Jewelry</div>
@@ -64,8 +66,9 @@ const Shop = () => {
 
         <Row>
           {storeItems?.map((item: Item) => {
+
             return (
-              <Col className="gy-5" sm={12} md={4} lg={3} onClick={() => showItemDetails(item)}>
+              <Col key={item.id} className="gy-5" sm={12} md={4} lg={3} onClick={() => showItemDetails(item)}>
                 <img className="item-image" src={"images/items/item" + item.id + "/main.jpg"} alt={item.name} />
               </Col>
             )
@@ -97,10 +100,19 @@ const Shop = () => {
 
 
         </Carousel>
+        {sizes ?
+          <Dropdown className="sizes-menu mb-3">
+            <Dropdown.Toggle variant="success" id="dropdown-basic">
+              Select Size
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+            {Object.keys(JSON.parse(sizes)).map(size => <Dropdown.Item href="#/action-3">{size}</Dropdown.Item>)}
+            </Dropdown.Menu>
+          </Dropdown> : null}
         <p className="item-description mb-3">{itemDescription}</p>
         <p className="item-price mb-3">${itemPrice}</p>
         <div className="text-center"><button className="add-to-cart-btn">Add To Cart</button></div>
-        
+
       </Modal.Body>
     </Modal>
   </div>
