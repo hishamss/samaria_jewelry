@@ -6,12 +6,15 @@ export class Item extends Model {
     @AllowNull(false)
     @Column name!: string;
 
+    @AllowNull(false)
+    @Column type!: string;
+
 
     @Column description!: string;
 
 
     @AllowNull(false)
-    @Column quantity!: number;
+    @Column quantity!: string;
 
 
     @AllowNull(false)
@@ -21,6 +24,5 @@ export class Item extends Model {
     @AllowNull(false)
     @Column numOfOtherImage!: number;
 
-    @Column sizes!: string;    
 
 }

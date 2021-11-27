@@ -2,10 +2,9 @@ export interface Item {
     id: number,
     name: string,
     description: string,
-    quantity: number,
+    quantity: string,
     price: number,
     numOfOtherImage: number,
-    sizes: string | null,
 }
 
 export interface Sizes {

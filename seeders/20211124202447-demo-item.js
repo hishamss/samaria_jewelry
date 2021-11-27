@@ -21,65 +21,66 @@ module.exports = {
       {
   
         name: "Item1",
+        type: "ring",
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy",
-        quantity: 3,
+        quantity: JSON.stringify({4:3, 2:2}),
         price: 29.99,
         numOfOtherImage: 3,
-        sizes: null
+
       },
       {
      
         name: "Item2",
+        type: "bracelet",
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-        quantity: 5,
+        quantity: JSON.stringify({"all":5}),
         price: 29.99,
         numOfOtherImage: 3,
-        sizes: null
       },
       {
   
         name: "Item3",
+        type: "ring",
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy",
-        quantity: 7,
+        quantity: JSON.stringify({7:3, 3:2, 8:0}),
         price: 49.99,
         numOfOtherImage: 3,
-        sizes: JSON.stringify({4:3, 2:2})
       },
       {
       
         name: "Item4",
+        type: "bracelet",
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's.",
-        quantity: 11,
+        quantity: JSON.stringify({"all":11}),
         price: 89.99,
         numOfOtherImage: 3,
-        sizes: JSON.stringify({7:3,9:2})
       },
       {
     
         name: "Item5",
+        type: "bracelet",
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem 5.",
-        quantity: 13,
+        quantity: JSON.stringify({"all":13}),
         price: 79.99,
         numOfOtherImage: 2,
-        sizes: null
       },
       {
       
         name: "Item6",
+        type: "bracelet",
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem 5.",
-        quantity: 18,
+        quantity: JSON.stringify({"all":18}),
         price: 59.99,
         numOfOtherImage: 2,
-        sizes: null
       },
       {
    
         name: "Item7",
+        type: "bracelet",
         description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem 5.",
-        quantity: 19,
+        quantity: JSON.stringify({"all":19}),
         price: 49.99,
         numOfOtherImage: 2,
-        sizes: null
       }
     ])
 
