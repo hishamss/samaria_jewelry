@@ -63,9 +63,10 @@
     background: #3A3E40 !important;
     font-family: 'Lustria', serif;
     color: white;
-    border: 0;
+    border: 0 !important;
 }
 
 .sizes-menu button:hover {
     background: #81D8D0 !important;
 }
+

@@ -10,3 +10,11 @@ export interface Item {
 export interface Sizes {
     [key: string]: number
   }
+
+  export interface CartItem {
+    id: number,
+    name: string,
+    quantity: number,
+    size: string,
+    price: number,
+}

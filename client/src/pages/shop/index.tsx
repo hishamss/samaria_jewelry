@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Carousel, Container, Row, Col, Modal, Dropdown } from "react-bootstrap";
-import { Item, Sizes } from "../../types";
+import { Carousel, Container, Row, Col, Modal, DropdownButton, Dropdown } from "react-bootstrap";
+//import {useCart} from "react-use-cart";
+import { Item, Sizes, CartItem } from "../../types";
 import { getStoreItems } from "../../utils/api"
 import "./index.css";
 
 
 
 const Shop = () => {
+  //const { addItem } = useCart();
   const [storeItems, setStoreItems] = useState<Item[]>();
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
@@ -16,7 +18,23 @@ const Shop = () => {
   const [itemPrice, setItemPrice] = useState<number>();
   const [numOfOtherImages, setNumOfOtherImages] = useState<number>();
   const [quantity, setQuantity] = useState<Sizes | undefined>();
+  const [selectedSize, setSelectedSize] = useState<string>("Select Size");
+  const handleSelectSize = (size: string) => {
+    setSelectedSize(size);
+  }
+  const handleAddToCart = () => {
+    const cartItem: CartItem = {
+      id: itemId!,
+      name: itemName,
+      quantity: 1,
+      size: selectedSize,
+      price: itemPrice!,
+    }
+    console.log("cartItem", cartItem)
+  }
+  //const [cartItem, setCartItem] = useState<cartItem | undefined>();
   const showItemDetails = (item: Item) => {
+    setSelectedSize("Select Size")
     setShow(true);
     setItemId(item.id);
     setItemName(item.name);
@@ -24,7 +42,6 @@ const Shop = () => {
     setItemPrice(item.price);
     setNumOfOtherImages(item.numOfOtherImage);
     setQuantity(JSON.parse(item.quantity));
-    console.log(JSON.parse(item.quantity));
   }
 
   useEffect(() => {
@@ -104,29 +121,23 @@ const Shop = () => {
         {quantity ?
           (quantity.hasOwnProperty("all") ? null :
 
-            <Dropdown className="sizes-menu mb-3">
-              <Dropdown.Toggle variant="success" id="dropdown-basic">
-                Select Size
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
+            <DropdownButton className="sizes-menu mb-3" title={selectedSize}>
 
-                {Object.keys(quantity).map(size => quantity[size] !== 0 ? <Dropdown.Item href="#">{size}</Dropdown.Item> : null
 
-                )}
-              </Dropdown.Menu>
-            </Dropdown>
+
+              {Object.keys(quantity).map(size => quantity[size] !== 0 ? <Dropdown.Item onClick={() => handleSelectSize(size)}>{size}</Dropdown.Item> : null
+
+              )}
+
+            </DropdownButton>
           ) : null
 
 
         }
 
-
-
-
-
         <p className="item-description mb-3">{itemDescription}</p>
         <p className="item-price mb-3">${itemPrice}</p>
-        <div className="text-center"><button className="add-to-cart-btn">Add To Cart</button></div>
+        <div className="text-center"><button className="add-to-cart-btn" onClick={() => handleAddToCart()}>Add To Cart</button></div>
 
       </Modal.Body>
     </Modal>
