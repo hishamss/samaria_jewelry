@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Carousel, Container, Row, Col, Modal, DropdownButton, Dropdown } from "react-bootstrap";
-//import {useCart} from "react-use-cart";
 import { Item, Sizes, CartItem } from "../../types";
 import { getStoreItems } from "../../utils/api"
 import "./index.css";
@@ -8,33 +7,44 @@ import "./index.css";
 
 
 const Shop = () => {
-  //const { addItem } = useCart();
   const [storeItems, setStoreItems] = useState<Item[]>();
   const [show, setShow] = useState(false);
-  const handleClose = () => setShow(false);
+  const handleClose = () => {setHasSizes(false);setShow(false);}
   const [itemId, setItemId] = useState<number>();
   const [itemName, setItemName] = useState("");
   const [itemDescription, setItemDescription] = useState("");
   const [itemPrice, setItemPrice] = useState<number>();
   const [numOfOtherImages, setNumOfOtherImages] = useState<number>();
   const [quantity, setQuantity] = useState<Sizes | undefined>();
-  const [selectedSize, setSelectedSize] = useState<string>("Select Size");
+  const [selectedSize, setSelectedSize] = useState<string>("all");
+  const[hasSizes, setHasSizes] = useState<boolean>(false);
   const handleSelectSize = (size: string) => {
     setSelectedSize(size);
+    setHasSizes(true);
   }
+
+ 
   const handleAddToCart = () => {
-    const cartItem: CartItem = {
-      id: itemId!,
-      name: itemName,
-      quantity: 1,
-      size: selectedSize,
-      price: itemPrice!,
+    if(hasSizes || quantity!.hasOwnProperty("all"))
+    {
+      let cartItem:CartItem = {
+        id: itemId!,
+        name: itemName,
+        quantity: 1,
+        size: selectedSize,
+        price: itemPrice!,
+      };
+      console.log(cartItem);
+      setHasSizes(false);
+      setShow(false);
+    }else {
+      console.log("select size first");
     }
-    console.log("cartItem", cartItem)
+    
   }
-  //const [cartItem, setCartItem] = useState<cartItem | undefined>();
+
   const showItemDetails = (item: Item) => {
-    setSelectedSize("Select Size")
+    setSelectedSize("all")
     setShow(true);
     setItemId(item.id);
     setItemName(item.name);
@@ -121,7 +131,7 @@ const Shop = () => {
         {quantity ?
           (quantity.hasOwnProperty("all") ? null :
 
-            <DropdownButton className="sizes-menu mb-3" title={selectedSize}>
+            <DropdownButton className="sizes-menu mb-3" title={selectedSize === "all" ? "Select Size": selectedSize}>
 
 
 
@@ -138,7 +148,7 @@ const Shop = () => {
         <p className="item-description mb-3">{itemDescription}</p>
         <p className="item-price mb-3">${itemPrice}</p>
         <div className="text-center"><button className="add-to-cart-btn" onClick={() => handleAddToCart()}>Add To Cart</button></div>
-
+       
       </Modal.Body>
     </Modal>
   </div>
