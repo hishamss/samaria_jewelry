@@ -8,11 +8,12 @@ import Cert from "./pages/certificate";
 import Cart from "./pages/cart";
 import Contact from "./pages/contactUs"
 import { Switch, Route } from "react-router-dom";
+// import { CartProvider} from "react-use-cart";
 import './App.css';
 
 function App() {
   return (
-  
+    // <CartProvider>
       <div className="App">
         <Header />
         <NavBar />
@@ -29,7 +30,7 @@ function App() {
         </div>
         <Footer />
       </div>
-  
+      // </CartProvider>
   );
 }
 
