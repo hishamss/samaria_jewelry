@@ -9,7 +9,7 @@ import "./index.css";
 const Shop = () => {
   const [storeItems, setStoreItems] = useState<Item[]>();
   const [show, setShow] = useState(false);
-  const handleClose = () => {setHasSizes(false);setShow(false);}
+  const handleClose = () => {setHasSizes(false);setDisplaySelectSizeMsg({opacity:0});setShow(false);}
   const [itemId, setItemId] = useState<number>();
   const [itemName, setItemName] = useState("");
   const [itemDescription, setItemDescription] = useState("");
@@ -18,9 +18,11 @@ const Shop = () => {
   const [quantity, setQuantity] = useState<Sizes | undefined>();
   const [selectedSize, setSelectedSize] = useState<string>("all");
   const[hasSizes, setHasSizes] = useState<boolean>(false);
+  const[displaySelectSizeMsg, setDisplaySelectSizeMsg] = useState({opacity:0});
   const handleSelectSize = (size: string) => {
     setSelectedSize(size);
     setHasSizes(true);
+    setDisplaySelectSizeMsg({opacity:0});
   }
 
  
@@ -37,8 +39,10 @@ const Shop = () => {
       console.log(cartItem);
       setHasSizes(false);
       setShow(false);
+      setDisplaySelectSizeMsg({opacity:0});
     }else {
       console.log("select size first");
+      setDisplaySelectSizeMsg({opacity:1});
     }
     
   }
@@ -147,6 +151,7 @@ const Shop = () => {
 
         <p className="item-description mb-3">{itemDescription}</p>
         <p className="item-price mb-3">${itemPrice}</p>
+        <p className="add-item-err-mssg" style={displaySelectSizeMsg}>Please select size</p>
         <div className="text-center"><button className="add-to-cart-btn" onClick={() => handleAddToCart()}>Add To Cart</button></div>
        
       </Modal.Body>
