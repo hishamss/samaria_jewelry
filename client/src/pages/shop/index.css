@@ -70,3 +70,11 @@
     background: #81D8D0 !important;
 }
 
+.add-item-err-mssg {
+    color: red;
+    font-family: 'Lustria', serif;
+    font-size: 0.8rem;
+    margin-top: 0;
+    
+}
+
