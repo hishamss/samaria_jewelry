@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Carousel, Container, Row, Col, Modal, DropdownButton, Dropdown } from "react-bootstrap";
-import { Item, Sizes, CartItem } from "../../types";
+import { Item, Sizes, CartItem} from "../../types";
 import { getStoreItems } from "../../utils/api"
 import "./index.css";
 
@@ -9,42 +9,67 @@ import "./index.css";
 const Shop = () => {
   const [storeItems, setStoreItems] = useState<Item[]>();
   const [show, setShow] = useState(false);
-  const handleClose = () => {setHasSizes(false);setDisplaySelectSizeMsg({opacity:0});setShow(false);}
-  const [itemId, setItemId] = useState<number>();
+  const handleClose = () => { setHasSizes(false); setDisplaySelectSizeMsg({ opacity: 0 }); setShow(false); }
+  const [itemId, setItemId] = useState<number | undefined>();
   const [itemName, setItemName] = useState("");
   const [itemDescription, setItemDescription] = useState("");
   const [itemPrice, setItemPrice] = useState<number>();
   const [numOfOtherImages, setNumOfOtherImages] = useState<number>();
   const [quantity, setQuantity] = useState<Sizes | undefined>();
   const [selectedSize, setSelectedSize] = useState<string>("all");
-  const[hasSizes, setHasSizes] = useState<boolean>(false);
-  const[displaySelectSizeMsg, setDisplaySelectSizeMsg] = useState({opacity:0});
+  const [hasSizes, setHasSizes] = useState<boolean>(false);
+  const [displaySelectSizeMsg, setDisplaySelectSizeMsg] = useState({ opacity: 0 });
   const handleSelectSize = (size: string) => {
     setSelectedSize(size);
     setHasSizes(true);
-    setDisplaySelectSizeMsg({opacity:0});
+    setDisplaySelectSizeMsg({ opacity: 0 });
   }
 
- 
+  const addItemToStorage = (item: CartItem) => {
+    let myCart = localStorage.getItem("samaria-cart");
+    if (!myCart) localStorage.setItem("samaria-cart", JSON.stringify(item));
+    if (myCart) {
+      let currentCart = JSON.parse(myCart);
+      // check if item is in the cart
+      if (currentCart!.hasOwnProperty(itemId)) {
+        // check if the item size in the cart. If yes, increase the quantity by 1
+        if (currentCart[itemId!]!.hasOwnProperty(selectedSize)) currentCart[itemId!][selectedSize].quantity += 1;
+        // check if the item size is not the cart. If yes, add item size to the cart
+        if (!currentCart[itemId!]!.hasOwnProperty(selectedSize)) currentCart[itemId!][selectedSize] = item[itemId!][selectedSize];
+      }
+      // add new item to cart
+      if (!currentCart!.hasOwnProperty(itemId)) currentCart[itemId!] = item[itemId!];
+
+      //update cart
+      localStorage.setItem("samaria-cart", JSON.stringify(currentCart));
+
+    }
+
+
+  }
   const handleAddToCart = () => {
-    if(hasSizes || quantity!.hasOwnProperty("all"))
-    {
-      let cartItem:CartItem = {
-        id: itemId!,
-        name: itemName,
-        quantity: 1,
-        size: selectedSize,
-        price: itemPrice!,
-      };
-      console.log(cartItem);
+    if (hasSizes || quantity!.hasOwnProperty("all")) {
+      let cartItem:CartItem =
+      {
+        [itemId!]:
+        {
+          [selectedSize]:
+          {
+            name: itemName,
+            quantity: 1,
+            price: itemPrice!,
+          }
+        }
+      }
+
+      addItemToStorage(cartItem);
       setHasSizes(false);
       setShow(false);
-      setDisplaySelectSizeMsg({opacity:0});
-    }else {
-      console.log("select size first");
-      setDisplaySelectSizeMsg({opacity:1});
+      setDisplaySelectSizeMsg({ opacity: 0 });
+    } else {
+      setDisplaySelectSizeMsg({ opacity: 1 });
     }
-    
+
   }
 
   const showItemDetails = (item: Item) => {
@@ -123,6 +148,7 @@ const Shop = () => {
                     className="d-block w-100 other-images"
                     src={"images/items/item" + itemId + "/" + index + ".jpg"}
                     alt="First slide"
+                    key={index}
                   />
                 </Carousel.Item>
               )
@@ -135,7 +161,7 @@ const Shop = () => {
         {quantity ?
           (quantity.hasOwnProperty("all") ? null :
 
-            <DropdownButton className="sizes-menu mb-1" title={selectedSize === "all" ? "Select Size": selectedSize}>
+            <DropdownButton className="sizes-menu mb-1" title={selectedSize === "all" ? "Select Size" : selectedSize}>
 
 
 
@@ -151,9 +177,9 @@ const Shop = () => {
         <p className="add-item-err-mssg mb-3" style={displaySelectSizeMsg}>* Please select size</p>
         <p className="item-description mb-3">{itemDescription}</p>
         <p className="item-price mb-3">${itemPrice}</p>
-        
+
         <div className="text-center"><button className="add-to-cart-btn" onClick={() => handleAddToCart()}>Add To Cart</button></div>
-       
+
       </Modal.Body>
     </Modal>
   </div>
