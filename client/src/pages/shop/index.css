@@ -71,9 +71,10 @@
 }
 
 .add-item-err-mssg {
-    color: white;
-    background: red;
+    color: red;
     font-family: 'Lustria', serif;
-    padding: 2px;
+    font-size: 0.8rem;
+    margin-top: 0;
+    
 }
 

@@ -135,7 +135,7 @@ const Shop = () => {
         {quantity ?
           (quantity.hasOwnProperty("all") ? null :
 
-            <DropdownButton className="sizes-menu mb-3" title={selectedSize === "all" ? "Select Size": selectedSize}>
+            <DropdownButton className="sizes-menu mb-1" title={selectedSize === "all" ? "Select Size": selectedSize}>
 
 
 
@@ -148,10 +148,10 @@ const Shop = () => {
 
 
         }
-
+        <p className="add-item-err-mssg mb-3" style={displaySelectSizeMsg}>* Please select size</p>
         <p className="item-description mb-3">{itemDescription}</p>
         <p className="item-price mb-3">${itemPrice}</p>
-        <p className="add-item-err-mssg" style={displaySelectSizeMsg}>Please select size</p>
+        
         <div className="text-center"><button className="add-to-cart-btn" onClick={() => handleAddToCart()}>Add To Cart</button></div>
        
       </Modal.Body>
