@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Carousel, Container, Row, Col, Modal, DropdownButton, Dropdown } from "react-bootstrap";
 import { Item, Sizes, CartItem} from "../../types";
-import { getStoreItems } from "../../utils/api"
+import { getStoreItems } from "../../utils/api";
+import {useDispatch} from "react-redux";
+import {UpdateCartCount} from "../../redux/action-creators"
 import "./index.css";
 
 
 
 const Shop = () => {
+const dispatch = useDispatch();
   const [storeItems, setStoreItems] = useState<Item[]>();
   const [show, setShow] = useState(false);
   const handleClose = () => { setHasSizes(false); setDisplaySelectSizeMsg({ opacity: 0 }); setShow(false); }
@@ -26,8 +29,8 @@ const Shop = () => {
   }
 
   const addItemToStorage = (item: CartItem) => {
-    let myCart = localStorage.getItem("samaria-cart");
-    if (!myCart) localStorage.setItem("samaria-cart", JSON.stringify(item));
+    let myCart = sessionStorage.getItem("samaria-cart");
+    if (!myCart) sessionStorage.setItem("samaria-cart", JSON.stringify(item));
     if (myCart) {
       let currentCart = JSON.parse(myCart);
       // check if item is in the cart
@@ -41,10 +44,11 @@ const Shop = () => {
       if (!currentCart!.hasOwnProperty(itemId)) currentCart[itemId!] = item[itemId!];
 
       //update cart
-      localStorage.setItem("samaria-cart", JSON.stringify(currentCart));
+      sessionStorage.setItem("samaria-cart", JSON.stringify(currentCart));
 
     }
 
+    dispatch(UpdateCartCount(Object.keys(JSON.parse(sessionStorage.getItem("samaria-cart")!)).length));
 
   }
   const handleAddToCart = () => {
