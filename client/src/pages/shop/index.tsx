@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Carousel, Container, Row, Col, Modal, DropdownButton, Dropdown } from "react-bootstrap";
 import { Item, Sizes, CartItem} from "../../types";
-import { getStoreItems } from "../../utils/api"
+import { getStoreItems } from "../../utils/api";
+import {useDispatch} from "react-redux";
+import {UpdateCartCount} from "../../redux/action-creators"
 import "./index.css";
 
 
 
 const Shop = () => {
+const dispatch = useDispatch();
   const [storeItems, setStoreItems] = useState<Item[]>();
   const [show, setShow] = useState(false);
   const handleClose = () => { setHasSizes(false); setDisplaySelectSizeMsg({ opacity: 0 }); setShow(false); }
@@ -45,6 +48,7 @@ const Shop = () => {
 
     }
 
+    dispatch(UpdateCartCount(Object.keys(JSON.parse(localStorage.getItem("samaria-cart")!)).length));
 
   }
   const handleAddToCart = () => {
