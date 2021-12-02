@@ -184,7 +184,7 @@ const Shop = () => {
 
         <div className="text-center"><button className="add-to-cart-btn" onClick={() => handleAddToCart()}>Add To Cart</button></div>
         <div className="text-center" id="empty-cart-mssg">
-          <i className="fas fa-exclamation-triangle"></i> Your cart will be cleared if you refresh or close the page
+          <i className="fas fa-exclamation-triangle"></i> Your items will be removed from cart if you refresh or close the page
         </div>
 
       </Modal.Body>
