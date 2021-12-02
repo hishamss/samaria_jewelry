@@ -11,7 +11,8 @@ const NavBar = () => {
     const cartCount = useSelector((state:reduxState) => state.cartCountReducer);
     const dispatch = useDispatch();
     useEffect(() => {
-        if(localStorage.getItem("samaria-cart")) dispatch(UpdateCartCount(Object.keys(JSON.parse(localStorage.getItem("samaria-cart")!)).length));
+        // get number of items in cart after refreshing the page
+        if(sessionStorage.getItem("samaria-cart")) dispatch(UpdateCartCount(Object.keys(JSON.parse(sessionStorage.getItem("samaria-cart")!)).length));
         
       });
     return <Navbar className="ms-2 me-2 mb-5">

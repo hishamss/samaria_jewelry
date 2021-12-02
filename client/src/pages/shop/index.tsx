@@ -29,8 +29,8 @@ const dispatch = useDispatch();
   }
 
   const addItemToStorage = (item: CartItem) => {
-    let myCart = localStorage.getItem("samaria-cart");
-    if (!myCart) localStorage.setItem("samaria-cart", JSON.stringify(item));
+    let myCart = sessionStorage.getItem("samaria-cart");
+    if (!myCart) sessionStorage.setItem("samaria-cart", JSON.stringify(item));
     if (myCart) {
       let currentCart = JSON.parse(myCart);
       // check if item is in the cart
@@ -44,11 +44,11 @@ const dispatch = useDispatch();
       if (!currentCart!.hasOwnProperty(itemId)) currentCart[itemId!] = item[itemId!];
 
       //update cart
-      localStorage.setItem("samaria-cart", JSON.stringify(currentCart));
+      sessionStorage.setItem("samaria-cart", JSON.stringify(currentCart));
 
     }
 
-    dispatch(UpdateCartCount(Object.keys(JSON.parse(localStorage.getItem("samaria-cart")!)).length));
+    dispatch(UpdateCartCount(Object.keys(JSON.parse(sessionStorage.getItem("samaria-cart")!)).length));
 
   }
   const handleAddToCart = () => {
