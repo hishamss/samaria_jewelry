@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Carousel, Container, Row, Col, Modal, DropdownButton, Dropdown } from "react-bootstrap";
-import { Item, Sizes, CartItem} from "../../types";
+import { Item, Sizes, CartItem } from "../../types";
 import { getStoreItems } from "../../utils/api";
-import {useDispatch} from "react-redux";
-import {UpdateCartCount} from "../../redux/action-creators"
+import { useDispatch } from "react-redux";
+import { UpdateCartCount } from "../../redux/action-creators"
 import "./index.css";
 
 
 
 const Shop = () => {
-const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const [storeItems, setStoreItems] = useState<Item[]>();
   const [show, setShow] = useState(false);
   const handleClose = () => { setHasSizes(false); setDisplaySelectSizeMsg({ opacity: 0 }); setShow(false); }
@@ -53,7 +53,7 @@ const dispatch = useDispatch();
   }
   const handleAddToCart = () => {
     if (hasSizes || quantity!.hasOwnProperty("all")) {
-      let cartItem:CartItem =
+      let cartItem: CartItem =
       {
         [itemId!]:
         {
@@ -183,6 +183,9 @@ const dispatch = useDispatch();
         <p className="item-price mb-3">${itemPrice}</p>
 
         <div className="text-center"><button className="add-to-cart-btn" onClick={() => handleAddToCart()}>Add To Cart</button></div>
+        <div className="text-center" id="empty-cart-mssg">
+          <i className="fas fa-exclamation-triangle"></i> Your items will be removed from cart if you refresh or close the page
+        </div>
 
       </Modal.Body>
     </Modal>
