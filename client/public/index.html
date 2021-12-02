@@ -63,6 +63,11 @@
 
   <script>var Alert = ReactBootstrap.Alert;</script>
 
+  <script>
+    // clear cart on pages refresh or close
+    window.BeforeUnloadEvent(localStorage.removeItem("samaria-cart"));
+  </script>
+
 </body>
 
 </html>
