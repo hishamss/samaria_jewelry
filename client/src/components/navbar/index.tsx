@@ -12,7 +12,7 @@ const NavBar = () => {
     const dispatch = useDispatch();
     useEffect(() => {
         // get number of items in cart after refreshing the page
-        if(sessionStorage.getItem("samaria-cart")) dispatch(UpdateCartCount(Object.keys(JSON.parse(sessionStorage.getItem("samaria-cart")!)).length));
+        if(localStorage.getItem("samaria-cart")) dispatch(UpdateCartCount(Object.keys(JSON.parse(localStorage.getItem("samaria-cart")!)).length));
         
       });
     return <Navbar className="ms-2 me-2 mb-5">
