@@ -101,6 +101,8 @@ const Shop = () => {
       <Carousel.Item interval={2000}>
         <img
           className="d-block w-100 carousel-image"
+          loading="lazy"
+          decoding="async"
           src="images/shop-images.jpg"
           alt="First slide"
         />
@@ -108,6 +110,8 @@ const Shop = () => {
       <Carousel.Item interval={2000}>
         <img
           className="d-block w-100 carousel-image"
+          loading="lazy"
+          decoding="async"
           src="images/shop-images.jpg"
           alt="Second slide"
         />
@@ -115,6 +119,8 @@ const Shop = () => {
       <Carousel.Item interval={2000}>
         <img
           className="d-block w-100 carousel-image"
+          loading="lazy"
+          decoding="async"
           src="images/shop-images.jpg"
           alt="Third slide"
         />
@@ -130,7 +136,8 @@ const Shop = () => {
 
             return (
               <Col key={item.id} className="gy-5" sm={12} md={4} lg={3} onClick={() => showItemDetails(item)}>
-                <img className="item-image" src={"images/items/item" + item.id + "/main.jpg"} alt={item.name} />
+                <img className="item-image" loading="lazy" key={item.id}
+                  decoding="async" src={"images/items/item" + item.id + "/main.jpg"} alt={item.name} />
               </Col>
             )
           })}
@@ -151,7 +158,9 @@ const Shop = () => {
                   <img
                     className="d-block w-100 other-images"
                     src={"images/items/item" + itemId + "/" + index + ".jpg"}
-                    alt="First slide"
+                    loading="lazy"
+                    decoding="async"
+                    alt="other-images"
                     key={index}
                   />
                 </Carousel.Item>
