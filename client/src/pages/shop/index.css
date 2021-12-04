@@ -11,18 +11,25 @@
 }
 
 .carousel-image {
-    height: 600px;
+    content-visibility: auto;
+    aspect-ratio: 2.5/1;
+   
+    background-color: #eee;
+    object-fit: cover;
 }
 
 .item-image {
     width: 360px;
-    height: 360px;
+    aspect-ratio: 1/1;
     cursor: pointer;
 }
 
 .other-images {
-   
-    max-height: 400px !important;
+    aspect-ratio: 1/1; 
+    content-visibility: auto;
+
+    background-color: #eee;
+    object-fit: cover;
 }
 
 .item-name {
