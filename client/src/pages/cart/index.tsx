@@ -1,43 +1,63 @@
-import React from "react";
-import { Table, Button } from "react-bootstrap"
+import React, { useState, useEffect } from "react";
+import { Table } from "react-bootstrap"
+import { CartItem, CartItemSize } from "../../types";
 import "./index.css";
 
 
 const Cart = () => {
+    const [cartItems, setCartItems] = useState<CartItem>([]);
+
+    useEffect(() => {
+        // get number of items in cart after refreshing the page
+        if (localStorage.getItem("samaria-cart")) setCartItems(JSON.parse(localStorage.getItem("samaria-cart")!));
+
+    }, []);
+
     return <div className="container cart-cont">
         <div className="cart-header mb-5">My Shopping Cart</div>
         <div className="cart-body mb-5">
-            <Table responsive className="cart-table p-5">
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Size</th>
-                        <th>Quantity</th>
-                        <th>Remove</th>
-                        <th>Price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td className="cart-table-first">
-                        <img className="cart-image" loading="lazy"
-                  decoding="async" src={"images/items/item" + 1 + "/main.jpg"} alt="ok" />
-                  <p className="cart-table-items">Item1</p>
-                        </td>
-                        <td className="cart-table-other"><p className="cart-table-items">Mark</p></td>
-                        <td className="cart-table-other">
-                            <p className="cart-table-items">
-                                <div className="increase-quan">+</div>
-                                2
-                                <div className='decrease-quan'>-</div>
-                            </p>
-                            </td>
-                        <td className="cart-table-other"><p className="cart-table-items">@mdo</p></td>
-                        <td className="cart-table-other"><p className="cart-table-items">$39.99</p></td>
-                    </tr>
-                </tbody>
-            </Table>
+            {Object.keys(cartItems).length === 0 ? <p className="empty-cart">Cart is Empty</p> :
+                (<Table responsive className="cart-table p-5">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Size</th>
+                            <th>Quantity</th>
+                            <th>Remove</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {Object.keys(cartItems).map((id: string, index: number) => {
+                            let currentItem: CartItemSize = cartItems[+id];
+                            console.log(currentItem);
+                            return currentItem.hasOwnProperty('all') ? 
+                               (<tr key={+id}>
+                                    <td className="cart-table-first">
+                                        <img className="cart-image" loading="lazy"
+                                            decoding="async" src={"images/items/item" + id + "/main.jpg"} alt="ok" />
+                                        <p className="cart-table-items">{currentItem['all'].name}</p>
+                                    </td>
+                                    <td className="cart-table-other"><p className="cart-table-items">All</p></td>
+                                    <td className="cart-table-other">
+                                        <p className="cart-table-items">
+
+                                            <i className="fas fa-plus-square increase-quan"></i>
+                                            {currentItem['all'].quantity}
+                                            <i className="fas fa-minus-square decrease-quan"></i>
+                                        </p>
+                                    </td>
+                                    <td className="cart-table-other"><p className="cart-table-items"><i className="far fa-trash-alt cart-table-delete-item"></i></p></td>
+                                    <td className="cart-table-other"><p className="cart-table-items">${(currentItem['all'].price) * (currentItem['all'].quantity)}</p></td>
+                                </tr>): (<div>more sizes</div>)
+                         
+                        }
+                        )}
+                    </tbody>
+                </Table>)
+            }
         </div>
+
     </div>
 }
 

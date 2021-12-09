@@ -44,29 +44,47 @@ font-size: 20px;
 
 .cart-table-items div {
     display: inline;
-    border-radius: 5px;
+    border-radius: 3px;
     cursor: pointer;
     opacity: 0.8;
     padding-left: 10px;
     padding-right: 10px;
+    width:20px;
 }
 
 .increase-quan{
-    background-color: #81D8D0;
-    color: #3A3E40;
-    font-size: 20px;
-    margin-right: 10px;
+    color: #81D8D0;
+    font-size: 30px;
+    margin-right: 20px;
+    cursor: pointer;
+    opacity: 0.8;
 
 }
 
 .decrease-quan{
-    background-color: #E0DEDE;
-    color: #3A3E40;
-    font-size: 20px;
-    margin-left: 10px;
+    color: #E0DEDE;
+    font-size: 30px;
+    margin-left: 20px;
+    cursor: pointer;
+    opacity: 0.8;
 }
 
 .increase-quan:hover, .decrease-quan:hover {
     opacity: 1;
+}
+
+.cart-table-delete-item {
+    font-size: 25px;
+}
+
+.cart-table-delete-item:hover {
+    color: red;
+    
+}
+
+.empty-cart {
+    font-size: 20px;
+    color: #3A3E40;
+    font-family: 'Lustria', serif;
 }
 
