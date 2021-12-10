@@ -59,5 +59,31 @@ itemsRouter.route("/add").post((req, res) => {
 export default itemsRouter;
 
 
+// Add Item Request:
+// JSON body:
+
+// {
+//     "password" : "",
+//     "newItem":
+//     {
+//             "name": "Item name",
+//             "type": "Item type",
+//                 "description": "Item description",
+//                     "price": number,
+//                         "numOfOtherImage": number,
+//                             "sizes": [
+//                                 {
+//                                     "size": "size1",
+//                                     "quantity": qunatity of this size1
+//                                 },
+//                                 {
+//                                     "size": "size2",
+//                                     "quantity": quantity of size2
+//                                 }
+//                             ]
+//     }
+// }
+
+
 
 
