@@ -22,7 +22,10 @@ export class Item extends Model {
     @AllowNull(false)
     @Column numOfOtherImage!: number;
 
-    @HasMany(() => Size)
+    @HasMany(() => Size, {
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE"
+    })
     sizes!: Size[];
 
 }

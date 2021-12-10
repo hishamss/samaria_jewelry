@@ -29,7 +29,7 @@ itemsRouter.route("/add").post((req, res) => {
                             include: Size
                         }).then(item => {
                             res.status(200)
-                            res.json(req.body)
+                            res.json(item)
                         }
 
                         ).catch(e => {
@@ -53,12 +53,54 @@ itemsRouter.route("/add").post((req, res) => {
             res.send("Unauthorized");
         }
     }
+    if (!req.body) {
+        res.status(400)
+        res.send("Incomplete request")
+    }
+})
 
+itemsRouter.route("/delete").delete((req, res) => {
+    if (req.body) {
+        let requestBody = req.body;
+        if (requestBody.hasOwnProperty('password')) {
+            let { password, itemId }: { password: string; itemId: number } = requestBody;
+            if (password === process.env.DELETE_PASS) {
+                if (itemId) {
+                    Item.destroy({
+                        where: { id: itemId }
+                    }).then(() => {
+                        res.status(200).end();
+
+                    }).catch(e => {
+                        res.status(400)
+                        res.json({ "error": e.message })
+                    })
+                }
+                if (!itemId) {
+                    res.status(400)
+                    res.send("Incomplete request")
+                }
+            }
+            if (password !== process.env.DELETE_PASS) {
+                res.status(401);
+                res.send("Unauthorized");
+            }
+        }
+        if (!requestBody.hasOwnProperty('password')) {
+            res.status(401);
+            res.send("Unauthorized");
+        }
+
+    }
+    if (!req.body) {
+        res.status(400)
+        res.send("Incomplete request")
+    }
 })
 
 export default itemsRouter;
 
-
+///////////////////////////////////////////////////////
 // Add Item Request:
 // JSON body:
 
@@ -83,7 +125,13 @@ export default itemsRouter;
 //                             ]
 //     }
 // }
+//////////////////////////////////////////////////////
+// Remove Item Request:
+// JSON Body:
 
-
+// {
+//     "password": "",
+//     "itemId": id
+// }
 
 
