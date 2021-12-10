@@ -1,6 +1,7 @@
 import { Sequelize } from 'sequelize-typescript';
 import * as dotenv from "dotenv";
 import { Item } from '../models/Item';
+import {Size} from "../models/Size"
 dotenv.config();
 export const sequelize = new Sequelize({
     database: process.env.DB_NAME,
@@ -18,5 +19,5 @@ export const sequelize = new Sequelize({
         timestamps: false
       },
     storage: ':memory:',
-    models: [Item],
+    models: [Item, Size ],
 });
