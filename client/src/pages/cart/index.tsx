@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { Table } from "react-bootstrap"
-import { CartItem, CartItemSize } from "../../types";
+import { CartItem } from "../../types";
 import "./index.css";
 
 
 const Cart = () => {
-    const [cartItems, setCartItems] = useState<CartItem>([]);
+    // const [cartItems, setCartItems] = useState<CartItem>([]);
 
     useEffect(() => {
         // get number of items in cart after refreshing the page
-        if (localStorage.getItem("samaria-cart")) setCartItems(JSON.parse(localStorage.getItem("samaria-cart")!));
+        // if (localStorage.getItem("samaria-cart")) setCartItems(JSON.parse(localStorage.getItem("samaria-cart")!));
 
     }, []);
 
     return <div className="container cart-cont">
-        <div className="cart-header mb-5">My Shopping Cart</div>
+        {/* <div className="cart-header mb-5">My Shopping Cart</div>
         <div className="cart-body mb-5">
             {Object.keys(cartItems).length === 0 ? <p className="empty-cart">Cart is Empty</p> :
                 (<Table responsive className="cart-table p-5">
@@ -56,7 +56,7 @@ const Cart = () => {
                     </tbody>
                 </Table>)
             }
-        </div>
+        </div> */}
 
     </div>
 }
