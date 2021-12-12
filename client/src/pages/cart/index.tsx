@@ -1,17 +1,29 @@
 import React, { useState, useEffect } from "react";
 import { Table } from "react-bootstrap"
 import { CartItem } from "../../types";
+import { useDispatch } from "react-redux";
+import { UpdateCartCount } from "../../redux/action-creators"
 import "./index.css";
 
 
 const Cart = () => {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
-
+    const dispatch = useDispatch();
     useEffect(() => {
         // get items in cart after loading the page
         if (localStorage.getItem("samaria-cart")) setCartItems(JSON.parse(localStorage.getItem("samaria-cart")!));
 
     }, []);
+
+    const deleteItem = (item:CartItem)=> {
+        console.log("deleteItem:", item)
+        let currentCart:CartItem[] = JSON.parse(localStorage.getItem("samaria-cart")!);
+        let indexToDelete:number = currentCart.indexOf(item);
+        currentCart.splice(indexToDelete, 1);
+        localStorage.setItem("samaria-cart", JSON.stringify(currentCart));
+        setCartItems(currentCart);
+        dispatch(UpdateCartCount(currentCart.length));
+    }
 
     return <div className="container cart-cont">
         <div className="cart-header mb-5">My Shopping Cart</div>
@@ -44,7 +56,11 @@ const Cart = () => {
                                         <i className="fas fa-minus-square decrease-quan"></i>
                                     </p>
                                 </td>
-                                <td className="cart-table-other"><p className="cart-table-items"><i className="far fa-trash-alt cart-table-delete-item"></i></p></td>
+                                <td className="cart-table-other">
+                                    {/* <p className="cart-table-items"> */}
+                                    <i className="far fa-trash-alt cart-table-delete-item" onClick={() => deleteItem(item)}></i>
+                                    {/* </p> */}
+                                    </td>
                                 <td className="cart-table-other"><p className="cart-table-items">${(item.price) * (item.quantity)}</p></td>
                             </tr>)
 
