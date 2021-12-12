@@ -16,15 +16,33 @@ const Cart = () => {
     }, []);
 
     const deleteItem = (item:CartItem)=> {
-        console.log("deleteItem:", item)
         let currentCart:CartItem[] = JSON.parse(localStorage.getItem("samaria-cart")!);
-        let indexToDelete:number = currentCart.indexOf(item);
+        let indexToDelete:number = currentCart.findIndex(currItem => (currItem.id === item.id) && (currItem.size === item.size));
+        console.log(indexToDelete)
         currentCart.splice(indexToDelete, 1);
         localStorage.setItem("samaria-cart", JSON.stringify(currentCart));
         setCartItems(currentCart);
         dispatch(UpdateCartCount(currentCart.length));
     }
 
+    const increaseQuantity = (item:CartItem) => {
+     let currentCart:CartItem[] = JSON.parse(localStorage.getItem("samaria-cart")!);
+     let indexToUpdate:number = currentCart.findIndex(currItem => (currItem.id === item.id) && (currItem.size === item.size));
+        console.log(indexToUpdate)
+        currentCart[indexToUpdate].quantity +=1;
+        localStorage.setItem("samaria-cart", JSON.stringify(currentCart));
+        setCartItems(currentCart);
+
+    }
+    const decreaseQuantity = (item:CartItem) => {
+        // only of quantity greater than 1
+        let currentCart:CartItem[] = JSON.parse(localStorage.getItem("samaria-cart")!);
+     let indexToUpdate:number = currentCart.findIndex(currItem => (currItem.id === item.id) && (currItem.size === item.size));
+        currentCart[indexToUpdate].quantity -=1;
+        localStorage.setItem("samaria-cart", JSON.stringify(currentCart));
+        setCartItems(currentCart);
+
+    }
     return <div className="container cart-cont">
         <div className="cart-header mb-5">My Shopping Cart</div>
         <div className="cart-body mb-5">
@@ -51,9 +69,9 @@ const Cart = () => {
                                 <td className="cart-table-other">
                                     <p className="cart-table-items">
 
-                                        <i className="fas fa-plus-square increase-quan"></i>
+                                        <i className="fas fa-plus-square increase-quan" onClick={() => increaseQuantity(item)}></i>
                                         {item.quantity}
-                                        <i className="fas fa-minus-square decrease-quan"></i>
+                                        <i className="fas fa-minus-square decrease-quan" onClick={() => item.quantity > 1? decreaseQuantity(item):null}></i>
                                     </p>
                                 </td>
                                 <td className="cart-table-other">
