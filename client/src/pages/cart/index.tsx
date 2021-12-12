@@ -5,18 +5,18 @@ import "./index.css";
 
 
 const Cart = () => {
-    // const [cartItems, setCartItems] = useState<CartItem>([]);
+    const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
     useEffect(() => {
-        // get number of items in cart after refreshing the page
-        // if (localStorage.getItem("samaria-cart")) setCartItems(JSON.parse(localStorage.getItem("samaria-cart")!));
+        // get items in cart after loading the page
+        if (localStorage.getItem("samaria-cart")) setCartItems(JSON.parse(localStorage.getItem("samaria-cart")!));
 
     }, []);
 
     return <div className="container cart-cont">
-        {/* <div className="cart-header mb-5">My Shopping Cart</div>
+        <div className="cart-header mb-5">My Shopping Cart</div>
         <div className="cart-body mb-5">
-            {Object.keys(cartItems).length === 0 ? <p className="empty-cart">Cart is Empty</p> :
+            {cartItems.length === 0 ? <p className="empty-cart">Cart is Empty</p> :
                 (<Table responsive className="cart-table p-5">
                     <thead>
                         <tr>
@@ -28,35 +28,32 @@ const Cart = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {Object.keys(cartItems).map((id: string, index: number) => {
-                            let currentItem: CartItemSize = cartItems[+id];
-                            console.log(currentItem);
-                            return currentItem.hasOwnProperty('all') ? 
-                               (<tr key={+id}>
-                                    <td className="cart-table-first">
-                                        <img className="cart-image" loading="lazy"
-                                            decoding="async" src={"images/items/item" + id + "/main.jpg"} alt="ok" />
-                                        <p className="cart-table-items">{currentItem['all'].name}</p>
-                                    </td>
-                                    <td className="cart-table-other"><p className="cart-table-items">All</p></td>
-                                    <td className="cart-table-other">
-                                        <p className="cart-table-items">
+                        {cartItems.map((item, index) => {
+                            return (<tr key={index}>
+                                <td className="cart-table-first">
+                                    <img className="cart-image" loading="lazy"
+                                        decoding="async" src={"images/items/" + (item.name).replace(/ /g, "_") + "/main.jpg"} alt={item.name} />
+                                    <p className="cart-table-items">{item.name}</p>
+                                </td>
+                                <td className="cart-table-other"><p className="cart-table-items">{item.size}</p></td>
+                                <td className="cart-table-other">
+                                    <p className="cart-table-items">
 
-                                            <i className="fas fa-plus-square increase-quan"></i>
-                                            {currentItem['all'].quantity}
-                                            <i className="fas fa-minus-square decrease-quan"></i>
-                                        </p>
-                                    </td>
-                                    <td className="cart-table-other"><p className="cart-table-items"><i className="far fa-trash-alt cart-table-delete-item"></i></p></td>
-                                    <td className="cart-table-other"><p className="cart-table-items">${(currentItem['all'].price) * (currentItem['all'].quantity)}</p></td>
-                                </tr>): (<div>more sizes</div>)
-                         
+                                        <i className="fas fa-plus-square increase-quan"></i>
+                                        {item.quantity}
+                                        <i className="fas fa-minus-square decrease-quan"></i>
+                                    </p>
+                                </td>
+                                <td className="cart-table-other"><p className="cart-table-items"><i className="far fa-trash-alt cart-table-delete-item"></i></p></td>
+                                <td className="cart-table-other"><p className="cart-table-items">${(item.price) * (item.quantity)}</p></td>
+                            </tr>)
+
                         }
                         )}
                     </tbody>
                 </Table>)
             }
-        </div> */}
+        </div>
 
     </div>
 }
