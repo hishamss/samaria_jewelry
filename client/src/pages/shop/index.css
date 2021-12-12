@@ -11,9 +11,7 @@
 }
 
 .carousel-image {
-    content-visibility: auto;
     aspect-ratio: 2.5/1;
-   
     background-color: #eee;
     object-fit: cover;
 }

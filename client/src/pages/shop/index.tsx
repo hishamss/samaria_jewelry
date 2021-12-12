@@ -105,8 +105,6 @@ const Shop = () => {
       <Carousel.Item interval={2000}>
         <img
           className="d-block w-100 carousel-image"
-          loading="lazy"
-          decoding="async"
           src="images/shop-images.jpg"
           alt="First slide"
         />
@@ -114,8 +112,6 @@ const Shop = () => {
       <Carousel.Item interval={2000}>
         <img
           className="d-block w-100 carousel-image"
-          loading="lazy"
-          decoding="async"
           src="images/shop-images.jpg"
           alt="Second slide"
         />
@@ -123,8 +119,6 @@ const Shop = () => {
       <Carousel.Item interval={2000}>
         <img
           className="d-block w-100 carousel-image"
-          loading="lazy"
-          decoding="async"
           src="images/shop-images.jpg"
           alt="Third slide"
         />
