@@ -1,22 +1,52 @@
 import React, { useState, useEffect } from "react";
 import { Table } from "react-bootstrap"
 import { CartItem } from "../../types";
+import { useDispatch } from "react-redux";
+import { UpdateCartCount } from "../../redux/action-creators"
 import "./index.css";
 
 
 const Cart = () => {
-    // const [cartItems, setCartItems] = useState<CartItem>([]);
-
+    const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const dispatch = useDispatch();
     useEffect(() => {
-        // get number of items in cart after refreshing the page
-        // if (localStorage.getItem("samaria-cart")) setCartItems(JSON.parse(localStorage.getItem("samaria-cart")!));
+        // get items in cart after loading the page
+        if (localStorage.getItem("samaria-cart")) setCartItems(JSON.parse(localStorage.getItem("samaria-cart")!));
 
     }, []);
 
+    const deleteItem = (item:CartItem)=> {
+        let currentCart:CartItem[] = JSON.parse(localStorage.getItem("samaria-cart")!);
+        let indexToDelete:number = currentCart.findIndex(currItem => (currItem.id === item.id) && (currItem.size === item.size));
+        console.log(indexToDelete)
+        currentCart.splice(indexToDelete, 1);
+        localStorage.setItem("samaria-cart", JSON.stringify(currentCart));
+        setCartItems(currentCart);
+        dispatch(UpdateCartCount(currentCart.length));
+    }
+
+    const increaseQuantity = (item:CartItem) => {
+     let currentCart:CartItem[] = JSON.parse(localStorage.getItem("samaria-cart")!);
+     let indexToUpdate:number = currentCart.findIndex(currItem => (currItem.id === item.id) && (currItem.size === item.size));
+        console.log(indexToUpdate)
+        currentCart[indexToUpdate].quantity +=1;
+        localStorage.setItem("samaria-cart", JSON.stringify(currentCart));
+        setCartItems(currentCart);
+
+    }
+    const decreaseQuantity = (item:CartItem) => {
+        // only of quantity greater than 1
+        let currentCart:CartItem[] = JSON.parse(localStorage.getItem("samaria-cart")!);
+     let indexToUpdate:number = currentCart.findIndex(currItem => (currItem.id === item.id) && (currItem.size === item.size));
+        currentCart[indexToUpdate].quantity -=1;
+        localStorage.setItem("samaria-cart", JSON.stringify(currentCart));
+        setCartItems(currentCart);
+
+    }
     return <div className="container cart-cont">
-        {/* <div className="cart-header mb-5">My Shopping Cart</div>
+        <div className="cart-header mb-5">My Shopping Cart</div>
         <div className="cart-body mb-5">
-            {Object.keys(cartItems).length === 0 ? <p className="empty-cart">Cart is Empty</p> :
+            {cartItems.length === 0 ? <p className="empty-cart">Cart is Empty</p> :
                 (<Table responsive className="cart-table p-5">
                     <thead>
                         <tr>
@@ -28,35 +58,36 @@ const Cart = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {Object.keys(cartItems).map((id: string, index: number) => {
-                            let currentItem: CartItemSize = cartItems[+id];
-                            console.log(currentItem);
-                            return currentItem.hasOwnProperty('all') ? 
-                               (<tr key={+id}>
-                                    <td className="cart-table-first">
-                                        <img className="cart-image" loading="lazy"
-                                            decoding="async" src={"images/items/item" + id + "/main.jpg"} alt="ok" />
-                                        <p className="cart-table-items">{currentItem['all'].name}</p>
-                                    </td>
-                                    <td className="cart-table-other"><p className="cart-table-items">All</p></td>
-                                    <td className="cart-table-other">
-                                        <p className="cart-table-items">
+                        {cartItems.map((item, index) => {
+                            return (<tr key={index}>
+                                <td className="cart-table-first">
+                                    <img className="cart-image" loading="lazy"
+                                        decoding="async" src={"images/items/" + (item.name).replace(/ /g, "_") + "/main.jpg"} alt={item.name} />
+                                    <p className="cart-table-items">{item.name}</p>
+                                </td>
+                                <td className="cart-table-other"><p className="cart-table-items">{item.size}</p></td>
+                                <td className="cart-table-other">
+                                    <p className="cart-table-items">
 
-                                            <i className="fas fa-plus-square increase-quan"></i>
-                                            {currentItem['all'].quantity}
-                                            <i className="fas fa-minus-square decrease-quan"></i>
-                                        </p>
+                                        <i className="fas fa-plus-square increase-quan" onClick={() => increaseQuantity(item)}></i>
+                                        {item.quantity}
+                                        <i className="fas fa-minus-square decrease-quan" onClick={() => item.quantity > 1? decreaseQuantity(item):null}></i>
+                                    </p>
+                                </td>
+                                <td className="cart-table-other">
+                                    {/* <p className="cart-table-items"> */}
+                                    <i className="far fa-trash-alt cart-table-delete-item" onClick={() => deleteItem(item)}></i>
+                                    {/* </p> */}
                                     </td>
-                                    <td className="cart-table-other"><p className="cart-table-items"><i className="far fa-trash-alt cart-table-delete-item"></i></p></td>
-                                    <td className="cart-table-other"><p className="cart-table-items">${(currentItem['all'].price) * (currentItem['all'].quantity)}</p></td>
-                                </tr>): (<div>more sizes</div>)
-                         
+                                <td className="cart-table-other"><p className="cart-table-items">${(item.price) * (item.quantity)}</p></td>
+                            </tr>)
+
                         }
                         )}
                     </tbody>
                 </Table>)
             }
-        </div> */}
+        </div>
 
     </div>
 }

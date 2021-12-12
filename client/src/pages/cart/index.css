@@ -22,15 +22,15 @@
 }
 
 .cart-table-first {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding-left: 120px !important; 
+    text-align: left;
 }
 .cart-table-other{
     vertical-align: middle;
 }
 
 .cart-image{
+    display: inline;
     width: 104px;
     aspect-ratio: 1/1;
     content-visibility: auto;
@@ -39,6 +39,7 @@
 }
 
 .cart-table-items {
+    display: inline;
 font-size: 20px;
 }
 
