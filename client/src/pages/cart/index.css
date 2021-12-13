@@ -9,6 +9,11 @@
     font-family: 'Lustria', serif;
 }
 
+.cart-subtotal {
+    font-size: 24px;
+    color: #3A3E40;
+    font-family: 'Lustria', serif;
+}
 .cart-table th {
     font-weight: normal;
     font-size: 24px;

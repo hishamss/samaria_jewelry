@@ -8,6 +8,7 @@ import "./index.css";
 
 const Cart = () => {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    let currentSubtotal = 0;
     const dispatch = useDispatch();
     useEffect(() => {
         // get items in cart after loading the page
@@ -58,7 +59,9 @@ const Cart = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {cartItems.map((item, index) => {
+                        {
+                        cartItems.map((item, index) => {
+                            currentSubtotal += (item.price) * (item.quantity)
                             return (<tr key={index}>
                                 <td className="cart-table-first">
                                     <img className="cart-image" loading="lazy"
@@ -75,20 +78,17 @@ const Cart = () => {
                                     </p>
                                 </td>
                                 <td className="cart-table-other">
-                                    {/* <p className="cart-table-items"> */}
                                     <i className="far fa-trash-alt cart-table-delete-item" onClick={() => deleteItem(item)}></i>
-                                    {/* </p> */}
                                     </td>
                                 <td className="cart-table-other"><p className="cart-table-items">${(item.price) * (item.quantity)}</p></td>
-                            </tr>)
-
-                        }
+                                
+                            </tr>)}
                         )}
                     </tbody>
                 </Table>)
             }
         </div>
-
+            <div className="cart-subtotal mb-5">Subtotal: ${currentSubtotal}</div>
     </div>
 }
 
