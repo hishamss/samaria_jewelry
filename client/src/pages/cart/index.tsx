@@ -27,6 +27,13 @@ const Cart = () => {
         state: yup.string().required("Required"),
         zip: yup.string().required("Required").matches(/^[0-9]+$/, "Invalid zip code").min(5, 'Invalid zip code').max(5, 'Invalid zip code')
     })
+    const addionalStateValidation = (value:any) => {
+        let error;
+        if(value === 'state') {
+            error = "Required"
+        }
+        return error;
+    }
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     let currentSubtotal = 0;
     const dispatch = useDispatch();
@@ -178,6 +185,7 @@ const Cart = () => {
                                 placeholder="state"
                                 name='state'
                                 type="input"
+                                validate={addionalStateValidation}
                                 as={Form.Select}>
                                 <option value="state">state</option>
                                 <option value="AL">AL</option>
