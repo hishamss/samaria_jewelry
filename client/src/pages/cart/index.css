@@ -94,3 +94,10 @@ font-size: 20px;
     font-family: 'Lustria', serif;
 }
 
+.formik_err_msg {
+    font-family: 'Lustria', serif;
+    color: red;
+    margin-top: 5px;
+    font-size: 12px;
+    padding-left: 5px;
+}
