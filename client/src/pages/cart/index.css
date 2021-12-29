@@ -101,3 +101,13 @@ font-size: 20px;
     font-size: 12px;
     padding-left: 5px;
 }
+
+#go-payment {
+    font-size: 28px;
+    color: white;
+    font-family: 'Lustria', serif;
+    background-color: #81D8D0;
+    border: 0;
+    border-radius: 5px;
+    height: 76px;
+}
