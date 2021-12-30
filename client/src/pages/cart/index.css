@@ -1,10 +1,10 @@
 .cart-cont {
     background-color: white;
-    padding: 3px 60px 3px 60px;
+    padding: 30px 60px 30px 60px;
 }
 
 .cart-header {
-    font-size: 24px;
+    font-size: 48px;
     color: #3A3E40;
     font-family: 'Lustria', serif;
 }
