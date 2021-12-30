@@ -103,11 +103,16 @@ font-size: 20px;
 }
 
 #go-payment {
-    font-size: 28px;
-    color: white;
+    background: #3A3E40;
     font-family: 'Lustria', serif;
-    background-color: #81D8D0;
-    border: 0;
+    color: white;
+    font-size: 20px;
     border-radius: 5px;
-    height: 76px;
+    border:0;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+#go-payment:hover {
+    background: #81D8D0;
 }
