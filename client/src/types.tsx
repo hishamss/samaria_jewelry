@@ -27,5 +27,17 @@ export interface CartItem {
 
 }
 
+export interface CheckoutFormValues {
+    firstName:string,
+    lastName:string,
+    email:string,
+    address1:string,
+    address2:string,
+    state:string,
+    zip:string
+
+}
+
+
 
 
