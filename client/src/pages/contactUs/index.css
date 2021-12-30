@@ -1,0 +1,27 @@
+.contact-cont {
+    background-color: white;
+    padding: 30px 60px 30px 60px;
+}
+.contact-header {
+    font-size: 48px;
+    color: #3A3E40;
+    font-family: 'Lustria', serif;
+}
+
+.contact-icons {
+    color: #3A3E40;
+    font-size: 35px;
+}
+
+.contact-icons:hover{
+    color: #81D8D0;
+}
+
+.contact-text {
+    font-size: 22px;
+}
+
+#facebook-link {
+    text-decoration: none;
+     color: inherit;
+}
