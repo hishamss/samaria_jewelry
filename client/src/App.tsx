@@ -13,23 +13,25 @@ import './App.css';
 
 function App() {
   return (
-  
-      <div className="App">
-        <Header />
-        <NavBar />
-        <div className="content">
+  <div>
+    Domain: {process.env.REACT_APP_AUTH0_DOMAIN}
+  </div>
+      // <div className="App">
+      //   <Header />
+      //   <NavBar />
+      //   <div className="content">
 
-          <Switch>
-            <Route key="about" path="/contact" exact component={Contact} />
-            <Route key="about" path="/about" exact component={About} />
-            <Route key="shop" path="/shop" exact component={Shop} />
-            <Route key="certificate" path="/certificate" exact component={Cert} />
-            <Route key="cart" path="/cart" exact component={Cart} />
-            <Route key="cart" path="/*" component={Shop} />
-          </Switch>
-        </div>
-        <Footer />
-      </div>
+      //     <Switch>
+      //       <Route key="about" path="/contact" exact component={Contact} />
+      //       <Route key="about" path="/about" exact component={About} />
+      //       <Route key="shop" path="/shop" exact component={Shop} />
+      //       <Route key="certificate" path="/certificate" exact component={Cert} />
+      //       <Route key="cart" path="/cart" exact component={Cart} />
+      //       <Route key="cart" path="/*" component={Shop} />
+      //     </Switch>
+      //   </div>
+      //   <Footer />
+      // </div>
   );
 }
 
