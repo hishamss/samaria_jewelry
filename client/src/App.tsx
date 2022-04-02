@@ -7,31 +7,31 @@ import Shop from "./pages/shop";
 import Cert from "./pages/certificate";
 import Cart from "./pages/cart";
 import Contact from "./pages/contactUs"
+import Admin from "./pages/admin"
 import { Switch, Route } from "react-router-dom";
 
 import './App.css';
 
 function App() {
   return (
-  <div>
-    Domain: {process.env.REACT_APP_AUTH0_DOMAIN}
-  </div>
-      // <div className="App">
-      //   <Header />
-      //   <NavBar />
-      //   <div className="content">
 
-      //     <Switch>
-      //       <Route key="about" path="/contact" exact component={Contact} />
-      //       <Route key="about" path="/about" exact component={About} />
-      //       <Route key="shop" path="/shop" exact component={Shop} />
-      //       <Route key="certificate" path="/certificate" exact component={Cert} />
-      //       <Route key="cart" path="/cart" exact component={Cart} />
-      //       <Route key="cart" path="/*" component={Shop} />
-      //     </Switch>
-      //   </div>
-      //   <Footer />
-      // </div>
+      <div className="App">
+        <Header />
+        <NavBar />
+        <div className="content">
+
+          <Switch>
+            <Route key="about" path="/contact" exact component={Contact} />
+            <Route key="about" path="/about" exact component={About} />
+            <Route key="shop" path="/shop" exact component={Shop} />
+            <Route key="certificate" path="/certificate" exact component={Cert} />
+            <Route key="cart" path="/cart" exact component={Cart} />
+            <Route key="admin" path="/admin" exact component={Admin} />
+            <Route key="default" path="/*" component={Shop} />
+          </Switch>
+        </div>
+        <Footer />
+      </div>
   );
 }
 
