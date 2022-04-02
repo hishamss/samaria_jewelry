@@ -1,0 +1,12 @@
+.login-out-btn{
+    background: #3A3E40;
+    font-family: 'Lustria', serif;
+    color: white;
+    font-size: 20px;
+    border-radius: 5px;
+    border:0;
+    }
+
+    .login-out-btn:hover {
+        background: #81D8D0;
+    }

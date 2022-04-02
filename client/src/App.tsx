@@ -7,13 +7,14 @@ import Shop from "./pages/shop";
 import Cert from "./pages/certificate";
 import Cart from "./pages/cart";
 import Contact from "./pages/contactUs"
+import Admin from "./pages/admin"
 import { Switch, Route } from "react-router-dom";
 
 import './App.css';
 
 function App() {
   return (
-  
+
       <div className="App">
         <Header />
         <NavBar />
@@ -25,7 +26,8 @@ function App() {
             <Route key="shop" path="/shop" exact component={Shop} />
             <Route key="certificate" path="/certificate" exact component={Cert} />
             <Route key="cart" path="/cart" exact component={Cart} />
-            <Route key="cart" path="/*" component={Shop} />
+            <Route key="admin" path="/admin" exact component={Admin} />
+            <Route key="default" path="/*" component={Shop} />
           </Switch>
         </div>
         <Footer />
