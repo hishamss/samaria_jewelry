@@ -69,6 +69,7 @@ const Admin = () => {
                 </select>
                 <br></br>
                 {itemType === 'ring' ? [
+                    <label>Number of sizes</label>,
                     <input value={numberOfSizes} type="number" min="1" onChange={(e) => SetNumberOfSizes(Number.parseInt(e.target.value))} />,
                     <br></br>]
                     : null}
@@ -77,7 +78,9 @@ const Admin = () => {
                 Price: <input value={itemPrice} type="number" name="price" min="1" onChange={(e) => SetItemPrice(Number.parseFloat(e.target.value))} />
                 <br></br>
                 {itemType !== 'ring' ?
-                    [<input type="number" name="quantity" min="1" onChange={(e) => handleChangeForSizes('all', Number.parseInt(e.target.value),1,'set size & quantity')
+                
+                    [<label>Quantity</label>,
+                    <input type="number" name="quantity" min="1" onChange={(e) => handleChangeForSizes('all', Number.parseInt(e.target.value),1,'set size & quantity')
                     } />,
                     <br></br>]
                     : null}
