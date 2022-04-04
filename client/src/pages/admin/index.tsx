@@ -7,7 +7,7 @@ const Admin = () => {
     const [itemType, SetItemType] = useState("");
     const [itemDescription, SetItemDescription] = useState("");
     const [itemPrice, SetItemPrice] = useState(0);
-    const [numberOfSizes, SetNumberOfSizes] = useState(1);
+    const [sizeWithQuantityArray, SetSizeWithQuantityArray] = useState("");
     const [itemsSizes, SetItemSizes] = useState<AddedItemSize[]>([]);
     const { loginWithRedirect, logout, isAuthenticated, isLoading } = useAuth0();
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -21,8 +21,9 @@ const Admin = () => {
                 sizes: itemsSizes
             }
             console.log(newItem)
+            resetForm();
         }
-        resetForm();
+        
     }
     const resetForm = () => {
         SetItemName("")
@@ -31,23 +32,31 @@ const Admin = () => {
         SetItemPrice(0)
         SetItemSizes([])
     }
-    const handleChangeForSizes = (sizeVal:string, quan: number, currIndex:number, setField:string) => {
-        if (quan > 0 && sizeVal === 'all') {
+
+    const handleChangeQuantityForItemsWithNoSizes = (quant:number) => {
+        if (quant > 0) {
             SetItemSizes([{
                 size: 'all',
-                quantity: quan
+                quantity: quant
             }])
         }
-        if(setField === 'setSize' && sizeVal !== 'all') {
-            let currentsizes = itemsSizes;
-            currentsizes[currIndex] = {size:sizeVal, quantity:quan}
-            SetItemSizes(currentsizes)
+    }
+    const handleAddSizeQuantity = (e:React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        e.preventDefault();
+        let tempSizeWithQuantityArray = sizeWithQuantityArray.split(":");
+        let currentSize:string = tempSizeWithQuantityArray[0];
+        let currentQuantity:number = Number.parseInt(tempSizeWithQuantityArray[1])
+        if(!isNaN(currentQuantity) && tempSizeWithQuantityArray.length === 2) {
+            SetItemSizes(currentArray => [...currentArray, {size:currentSize,quantity:currentQuantity}])
+            alert(`size ${currentSize} and quantity ${currentQuantity} added Successfully`)
+        }else {
+            alert(`Failed to add size, please add size with quantity in this format size:quantity`)
         }
-        if(setField === 'setQuantity' && quan > 0) {
-            let currentsizes = itemsSizes;
-            currentsizes[currIndex].quantity= quan
-            SetItemSizes(currentsizes)
-        }
+        SetSizeWithQuantityArray('');
+    }
+    const handleChangeItemType = (type:string) => {
+        if(type ==='ring') SetItemSizes([])
+        SetItemType(type);
     }
     return <div>
         <div>
@@ -61,18 +70,13 @@ const Admin = () => {
                 Item Name: <input type="text" name="itemName" placeholder="Item Name" value={itemName} onChange={(e) => SetItemName(e.target.value)} />
 
                 <br></br>
-               Item Type: <select name="type" onChange={(e) => SetItemType(e.target.value)} value={itemType}>
+               Item Type: <select name="type" onChange={(e) => handleChangeItemType(e.target.value)} value={itemType}>
                     <option value="" selected disabled hidden>Item Type</option>
                     <option value='earing'>earing</option>
                     <option value='pendant'>pendant</option>
                     <option value='ring'>ring</option>
                 </select>
                 <br></br>
-                {itemType === 'ring' ? [
-                    <label>Number of sizes</label>,
-                    <input value={numberOfSizes} type="number" min="1" onChange={(e) => SetNumberOfSizes(Number.parseInt(e.target.value))} />,
-                    <br></br>]
-                    : null}
                 Description: <textarea value={itemDescription} name="description" placeholder="Item Description" maxLength={250} onChange={(e) => SetItemDescription(e.target.value)} />
                 <br></br>
                 Price: <input value={itemPrice} type="number" name="price" min="1" onChange={(e) => SetItemPrice(Number.parseFloat(e.target.value))} />
@@ -80,26 +84,21 @@ const Admin = () => {
                 {itemType !== 'ring' ?
                 
                     [<label>Quantity</label>,
-                    <input type="number" name="quantity" min="1" onChange={(e) => handleChangeForSizes('all', Number.parseInt(e.target.value),1,'set size & quantity')
+                    <input type="number" name="quantity" min="1" onChange={(e) => handleChangeQuantityForItemsWithNoSizes(Number.parseInt(e.target.value))
                     } />,
                     <br></br>]
                     : null}
                 {itemType === 'ring' ?
-                    (<table>
-                        <tr>
-                            <th>Size</th>
-                            <th>Quantity</th>
-                        </tr>
-                        {[...Array(numberOfSizes)].map((num, index) =>
+                   
 
-                            <tr key={index}>
-                                <td><input type="number" min="1" onChange={(e) => handleChangeForSizes(e.target.value, 0 ,index,'setSize')} /></td>
-                                <td><input type="number" min="1" onChange={(e) => handleChangeForSizes('any', Number.parseInt(e.target.value) ,index,'setQuantity')} /></td>
-                            </tr>
-                        )}
+                                [<label>Size:Quantity</label>,
+                                <input type="text"  value={sizeWithQuantityArray} placeholder="size:quantity. ex 7:3 means size 7 has 3 pieces" onChange={(e) => SetSizeWithQuantityArray(e.target.value)} />,
+                                <button onClick={e => handleAddSizeQuantity(e)}>Add</button>,
+                            <br></br>]
+                     
+               
 
-
-                    </table>) : null}
+: null}
                 <button type="submit">Add Item</button>
             </form>
         )}
