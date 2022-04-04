@@ -1,7 +1,7 @@
 export interface Item {
     id: number,
     name: string,
-    type:string,
+    type: string,
     description: string,
     price: number,
     numOfOtherImage: number,
@@ -9,34 +9,50 @@ export interface Item {
 }
 
 export interface ItemSize {
-    id:number,
+    id: number,
     itemId: number,
     size: string,
-    quantity:number
+    quantity: number
 }
 
 
 export interface CartItem {
- 
-        id: number,
-        name: string,
-        price: number,
-        size: string,
-        quantity:number
+
+    id: number,
+    name: string,
+    price: number,
+    size: string,
+    quantity: number
 
 
 }
 
 export interface CheckoutFormValues {
-    firstName:string,
-    lastName:string,
-    email:string,
-    address1:string,
-    address2:string,
-    state:string,
-    zip:string
+    firstName: string,
+    lastName: string,
+    email: string,
+    address1: string,
+    address2: string,
+    state: string,
+    zip: string
 
 }
+
+export interface AddedItemSize {
+    size:string,
+    quantity:number
+}
+
+export interface NewItem {
+
+    name: string,
+    type: string,
+    description: string,
+    price: number,
+    sizes: AddedItemSize[]
+
+}
+
 
 
 
