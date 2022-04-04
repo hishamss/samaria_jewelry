@@ -10,3 +10,7 @@
     .login-out-btn:hover {
         background: #81D8D0;
     }
+
+    .formMessages {
+        color: red;
+    }
