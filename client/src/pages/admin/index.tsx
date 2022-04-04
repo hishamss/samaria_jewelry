@@ -8,7 +8,7 @@ const Admin = () => {
     const [itemDescription, SetItemDescription] = useState("");
     const [itemPrice, SetItemPrice] = useState(0);
     const [sizeWithQuantityArray, SetSizeWithQuantityArray] = useState("");
-    const [itemsSizes, SetItemSizes] = useState<AddedItemSize[]>([]);
+    const [itemSizes, SetItemSizes] = useState<AddedItemSize[]>([]);
     const [ItemNameMessage, SetItemNameMessage] = useState(false);
     const [ItemTypeMessage, SetItemTypeMessage] = useState(false);
     const [ItemPriceMessage, SetItemPriceMessage] = useState(false);
@@ -17,13 +17,13 @@ const Admin = () => {
     const { loginWithRedirect, logout, isAuthenticated, isLoading } = useAuth0();
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        if (itemName !== "" && itemType !== "" && itemPrice > 0 && itemsSizes.length > 0) {
+        if (itemName !== "" && itemType !== "" && itemPrice > 0 && itemSizes.length > 0) {
             const newItem: NewItem = {
                 name: itemName,
                 type: itemType,
                 description: itemDescription,
                 price: itemPrice,
-                sizes: itemsSizes
+                sizes: itemSizes
             }
             console.log(newItem)
             resetForm();
@@ -31,8 +31,8 @@ const Admin = () => {
         if (itemName === "") SetItemNameMessage(true);
         if (itemType === "") SetItemTypeMessage(true);
         if (itemPrice <= 0) SetItemPriceMessage(true);
-        if (itemsSizes.length === 0 && itemType !== 'ring') SetItemQuantityMessage(true);
-        if (itemsSizes.length === 0 && itemType === 'ring') SetItemSizeMessage(true);
+        if (itemSizes.length === 0 && itemType !== 'ring') SetItemQuantityMessage(true);
+        if (itemSizes.length === 0 && itemType === 'ring') SetItemSizeMessage(true);
     }
     const resetForm = () => {
         SetItemName("")
@@ -103,7 +103,21 @@ const Admin = () => {
                     [<label>Size:Quantity</label>,
                     <input type="text" value={sizeWithQuantityArray} placeholder="size:quantity. ex 7:3 means size 7 has 3 pieces" onChange={(e) => { SetSizeWithQuantityArray(e.target.value); SetItemSizeMessage(false) }} />,
                     <button onClick={e => handleAddSizeQuantity(e)}>Add Size</button>,
-                    <p className="formMessages" style={{ opacity: ItemSizeMessage ? "1" : "0" }}>Size and quantity must be added for this type</p>]
+                    <p className="formMessages" style={{ opacity: ItemSizeMessage ? "1" : "0" }}>Size and quantity must be added for this type</p>,
+                    <table>
+                        <tr>
+                            <th>Size</th>
+                            <th>Quantity</th>
+                        </tr>
+                        {itemSizes.map((sizeQantity) => 
+                            <tr>
+                                <td>{sizeQantity.size}</td>
+                                <td>{sizeQantity.quantity}</td>
+                            </tr>
+                        )}
+                    </table>
+
+                        ]
 
 
 
