@@ -16,42 +16,40 @@ itemsRouter.route("/").get((req, res) => {
 
 itemsRouter.route("/add").post((req, res) => {
     if (req.body) {
-        console.log(req.body)
-        let requestBody = req.body;
-        if (requestBody.hasOwnProperty('password')) {
-            let { password, newItem }: { password: string; newItem: NewItem } = requestBody;
-            if (password === process.env.CREATE_PASS) {
-                if (newItem) {
-                    Item.create(
+        let newItem: NewItem = req.body;
+        // if (requestBody.hasOwnProperty('password')) {
+        //     let { password, newItem }: { password: string; newItem: NewItem } = requestBody;
+        //     if (password === process.env.CREATE_PASS) {
+        if (newItem) {
+            Item.create(
 
-                        newItem
-                        , {
-                            include: Size
-                        }).then(item => {
-                            res.status(200)
-                            res.json(item)
-                        }
-
-                        ).catch(e => {
-                            res.status(400)
-                            res.json({ "error": e.message })
-                        })
-
+                newItem
+                , {
+                    include: Size
+                }).then(item => {
+                    res.status(200)
+                    res.json(item)
                 }
-                if (!newItem) {
+                ).catch(e => {
                     res.status(400)
-                    res.send("Incomplete request")
-                }
-            }
-            if (password !== process.env.CREATE_PASS) {
-                res.status(401);
-                res.send("Unauthorized");
-            }
+                    res.json({ "error": e.message })
+                })
         }
-        if (!requestBody.hasOwnProperty('password')) {
-            res.status(401);
-            res.send("Unauthorized");
-        }
+        //         }
+        //         if (!newItem) {
+        //             res.status(400)
+        //             res.send("Incomplete request")
+        //         }
+        //     }
+        //     if (password !== process.env.CREATE_PASS) {
+        //         res.status(401);
+        //         res.send("Unauthorized");
+        //     }
+        // }
+        // if (!requestBody.hasOwnProperty('password')) {
+        //     res.status(401);
+        //     res.send("Unauthorized");
+        // }
     }
     if (!req.body) {
         res.status(400)

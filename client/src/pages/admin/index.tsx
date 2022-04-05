@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./index.css";
 import { useAuth0 } from "@auth0/auth0-react";
 import { NewItem, AddedItemSize } from "../../types"
+import { addNewItem } from "../../utils/api";
 const Admin = () => {
     const [itemName, SetItemName] = useState("");
     const [itemType, SetItemType] = useState("");
@@ -23,9 +24,13 @@ const Admin = () => {
                 type: itemType,
                 description: itemDescription,
                 price: itemPrice,
+                numOfOtherImage: 3,
                 sizes: itemSizes
             }
-            console.log(newItem)
+            addNewItem(newItem).then(result => {
+                console.log("added item: ")
+                console.log(result)
+            })
             resetForm();
         }
         if (itemName === "") SetItemNameMessage(true);
@@ -57,8 +62,18 @@ const Admin = () => {
         let currentSize: string = tempSizeWithQuantityArray[0];
         let currentQuantity: number = Number.parseInt(tempSizeWithQuantityArray[1])
         if (!isNaN(currentQuantity) && tempSizeWithQuantityArray.length === 2) {
-            SetItemSizes(currentArray => [...currentArray, { size: currentSize, quantity: currentQuantity }])
-            alert(`size ${currentSize} and quantity ${currentQuantity} added Successfully`)
+            let currentItemSizes = itemSizes;
+            let sizeExist = false
+            for(let i = 0; i<currentItemSizes.length; i++) {
+                if(currentItemSizes[i].size === currentSize) { 
+                    currentItemSizes[i].quantity += currentQuantity;
+                    SetItemSizes(currentItemSizes);
+                    sizeExist = true;
+                    break;
+                }
+                
+            }
+            if (!sizeExist) SetItemSizes(currentArray => [...currentArray, { size: currentSize, quantity: currentQuantity }])
         } else {
             alert(`Failed to add size, please add size with quantity in this format size:quantity`)
         }

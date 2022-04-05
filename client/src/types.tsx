@@ -49,6 +49,7 @@ export interface NewItem {
     type: string,
     description: string,
     price: number,
+    numOfOtherImage: number,
     sizes: AddedItemSize[]
 
 }
