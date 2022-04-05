@@ -16,6 +16,9 @@ const Admin = () => {
     const [ItemQuantityMessage, SetItemQuantityMessage] = useState(false);
     const [ItemSizeMessage, SetItemSizeMessage] = useState(false);
     const [JWTToken, SetJWTToken] = useState<string|undefined>();
+    const [formSubmitMessage, SetFormSubmitMessage] = useState("");
+    const [formSubmitMessageShow, SetFormSubmitMessageShow] = useState(false);
+    const [showLoadingMessage, SetShowLoadingMessage] = useState(false);
     const { loginWithRedirect, logout, isAuthenticated, isLoading, getIdTokenClaims} = useAuth0();
     useEffect( () => {
         if(isAuthenticated) {
@@ -29,6 +32,8 @@ const Admin = () => {
     })
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        SetFormSubmitMessageShow(false);
+        SetShowLoadingMessage(true);
         if (itemName !== "" && itemType !== "" && itemPrice > 0 && itemSizes.length > 0) {
             const newItem: NewItem = {
                 name: itemName,
@@ -38,10 +43,10 @@ const Admin = () => {
                 numOfOtherImage: 3,
                 sizes: itemSizes
             }
-            console.log("Token", JWTToken)
             addNewItem(newItem, JWTToken).then(result => {
-                console.log("added item: ")
-                console.log(result)
+                SetShowLoadingMessage(false);
+                SetFormSubmitMessage(result.message);
+                SetFormSubmitMessageShow(true);
             })
             resetForm();
         }
@@ -103,10 +108,10 @@ const Admin = () => {
         </div>
         <br></br>
         {isLoading && (<div>Loading...</div>)}
-        {/* {!isLoading && isAuthenticated && ( */}
-        {true && (
+        {!isLoading && isAuthenticated && (
+        
             <form onSubmit={e => handleSubmit(e)}>
-                Item Name: <input type="text" name="itemName" placeholder="Item Name" value={itemName} onChange={(e) => { SetItemName(e.target.value); SetItemNameMessage(false) }} />
+                Item Name: <input type="text" name="itemName" placeholder="Item Name" value={itemName} onChange={(e) => { SetItemName((e.target.value).toLocaleUpperCase()); SetItemNameMessage(false) }} />
                 <p className="formMessages" style={{ opacity: ItemNameMessage ? "1" : "0" }}>Required</p>
                 Item Type: <select name="type" onChange={(e) => { handleChangeItemType(e.target.value); SetItemTypeMessage(false) }} value={itemType}>
                     <option value="" selected disabled hidden>Item Type</option>
@@ -151,6 +156,8 @@ const Admin = () => {
 
                     : null}
                 <button type="submit">Add Item</button>
+                <p className="formMessages" style={{ opacity: formSubmitMessageShow ? "1" : "0" }}>{formSubmitMessage}</p>
+                <p className="formMessages" style={{ opacity: showLoadingMessage ? "1" : "0" }}>Loading....</p>
             </form>
         )}
     </div>

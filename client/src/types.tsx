@@ -54,7 +54,7 @@ export interface NewItem {
 
 }
 
-export interface APIError {
+export interface APIMessage {
     message: string
 }
 
