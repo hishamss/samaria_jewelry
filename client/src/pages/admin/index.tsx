@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./index.css";
-import { useAuth0 } from "@auth0/auth0-react";
+import { IdToken, useAuth0 } from "@auth0/auth0-react";
 import { NewItem, AddedItemSize } from "../../types"
 import { addNewItem } from "../../utils/api";
 const Admin = () => {
@@ -15,13 +15,13 @@ const Admin = () => {
     const [ItemPriceMessage, SetItemPriceMessage] = useState(false);
     const [ItemQuantityMessage, SetItemQuantityMessage] = useState(false);
     const [ItemSizeMessage, SetItemSizeMessage] = useState(false);
-    const { loginWithRedirect, logout, isAuthenticated, isLoading, getIdTokenClaims  } = useAuth0();
+    const [JWTToken, SetJWTToken] = useState<string|undefined>();
+    const { loginWithRedirect, logout, isAuthenticated, isLoading, getIdTokenClaims} = useAuth0();
     useEffect( () => {
         if(isAuthenticated) {
             (async () => {
                 const claims = await getIdTokenClaims();
-                console.log("token: ")
-                console.log(claims?.__raw)
+                SetJWTToken(claims?.__raw)
             })();
         }
         
@@ -38,7 +38,8 @@ const Admin = () => {
                 numOfOtherImage: 3,
                 sizes: itemSizes
             }
-            addNewItem(newItem).then(result => {
+            console.log("Token", JWTToken)
+            addNewItem(newItem, JWTToken).then(result => {
                 console.log("added item: ")
                 console.log(result)
             })
@@ -102,7 +103,8 @@ const Admin = () => {
         </div>
         <br></br>
         {isLoading && (<div>Loading...</div>)}
-        {!isLoading && isAuthenticated && (
+        {/* {!isLoading && isAuthenticated && ( */}
+        {true && (
             <form onSubmit={e => handleSubmit(e)}>
                 Item Name: <input type="text" name="itemName" placeholder="Item Name" value={itemName} onChange={(e) => { SetItemName(e.target.value); SetItemNameMessage(false) }} />
                 <p className="formMessages" style={{ opacity: ItemNameMessage ? "1" : "0" }}>Required</p>

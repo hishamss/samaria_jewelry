@@ -54,6 +54,10 @@ export interface NewItem {
 
 }
 
+export interface APIError {
+    message: string
+}
+
 
 
 

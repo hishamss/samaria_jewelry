@@ -1,6 +1,6 @@
-import axios from 'axios';
-import { Item, NewItem } from "../types";
 
+import axios from 'axios';
+import { Item, NewItem, APIError } from "../types";
 export const getStoreItems = async (): Promise<Item[]> => {
     try {
         const { data } = await axios.get("/api/items/");
@@ -11,7 +11,7 @@ export const getStoreItems = async (): Promise<Item[]> => {
     }
 }
 
-export const addNewItem = async (newItem: NewItem): Promise<NewItem | null> => {
+export const addNewItem = async (newItem: NewItem, JWTToken:string|undefined): Promise<NewItem | APIError> => {
     try {
         const { data } = await axios({
             method: 'post',
@@ -19,12 +19,15 @@ export const addNewItem = async (newItem: NewItem): Promise<NewItem | null> => {
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
+                "Authorization": "Bearer " + JWTToken
             },
             data: newItem
         });
         return (data as NewItem);
-    } catch (e) {
+    } catch (e:any) {
         console.log(e);
-        return null;
+        if(e.response.status === 400) return {message: "Incomplete request"}
+        if(e.response.status === 401) return {message: "UnAuthroized"}
+        return {message: "Internal Server Error"}
     }
 }
