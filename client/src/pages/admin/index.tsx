@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./index.css";
 import { useAuth0 } from "@auth0/auth0-react";
 import { NewItem, AddedItemSize } from "../../types"
@@ -15,7 +15,18 @@ const Admin = () => {
     const [ItemPriceMessage, SetItemPriceMessage] = useState(false);
     const [ItemQuantityMessage, SetItemQuantityMessage] = useState(false);
     const [ItemSizeMessage, SetItemSizeMessage] = useState(false);
-    const { loginWithRedirect, logout, isAuthenticated, isLoading } = useAuth0();
+    const { loginWithRedirect, logout, isAuthenticated, isLoading, getIdTokenClaims  } = useAuth0();
+    useEffect( () => {
+        if(isAuthenticated) {
+            (async () => {
+                const claims = await getIdTokenClaims();
+                console.log("token: ")
+                console.log(claims?.__raw)
+            })();
+        }
+        
+        
+    })
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         if (itemName !== "" && itemType !== "" && itemPrice > 0 && itemSizes.length > 0) {
