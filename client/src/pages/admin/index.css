@@ -1,4 +1,4 @@
-.login-out-btn{
+.adminPageBtns{
     background: #3A3E40;
     font-family: 'Lustria', serif;
     color: white;
@@ -7,12 +7,17 @@
     border:0;
     }
 
-    .login-out-btn:hover {
+.adminCard {
+    width:50%;
+    margin: 20px 0;
+    
+}
+    .adminPageBtns:hover {
         background: #81D8D0;
     }
 
     .formMessages {
-        color: red;
+        color: red !important;
     }
 
     
