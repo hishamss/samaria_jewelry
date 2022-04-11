@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Item, NewItem, APIMessage } from "../types";
 export const getStoreItems = async (): Promise<Item[]> => {
     try {
-        const { data } = await axios.get("/api/items/");
+        const { data } = await axios.get("/api/items");
         return (data as Item[]);
     } catch (e) {
       
@@ -15,7 +15,7 @@ export const addNewItem = async (newItem: NewItem, JWTToken:string|undefined): P
     try {
         await axios({
             method: 'post',
-            url: "/api/items/add/",
+            url: "/api/items/add",
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
@@ -36,7 +36,7 @@ export const deleteItem = async (itemName: string, JWTToken:string|undefined): P
     try {
         await axios({
             method: 'delete',
-            url: "/api/items/delete/",
+            url: "/api/items/delete",
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
@@ -55,7 +55,7 @@ export const deleteItem = async (itemName: string, JWTToken:string|undefined): P
 export const s3Upload = async (formData:FormData, JWTToken:string|undefined):Promise<APIMessage> => {
     try{
       
-            await axios.post("/api/items/s3-upload/", formData , {
+            await axios.post("/api/items/s3-upload", formData , {
                 headers: {
                     "Content-Type": "multipart/form-data",
                     "Authorization": "Bearer " + JWTToken

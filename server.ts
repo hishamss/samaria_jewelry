@@ -33,11 +33,25 @@ const upload = multer({
                 `${req.body.folder}/${file.originalname}.jpg`
             );
         },
-    })
+    }),
+    limits: {fileSize: 1500000},
+    fileFilter: (req:any, file:any, cb:any) => {
+        checkFileType(file, cb);
+    }
 }).array("images")
 
 
-
+const checkFileType = (file:any, cb:any) => {
+    console.log("fileChecker", file);
+    const filetypes = /jpeg|jpg/;
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = filetypes.test(file.mimetype);
+  if (extname && mimetype) {
+    return cb(null, true);
+  } else {
+    cb("Error: Images Only");
+  }
+}
 const { auth } = require('express-oauth2-jwt-bearer');
 const checkJwt = auth({
     audience: process.env.AUTH0_AUDIENCE,
@@ -52,7 +66,7 @@ if (process.env.NODE_ENV === 'production') {
 
 
 
-app.get("/api/items/", (req, res) => {
+app.get("/api/items", (req, res) => {
     Item.findAll({ include: [Size] })
         .then(items => {
             res.json(items)
@@ -61,7 +75,7 @@ app.get("/api/items/", (req, res) => {
         .catch(e => console.log(e))
 });
 
-app.post("/api/items/s3-upload/", checkJwt, (req, res) => {
+app.post("/api/items/s3-upload", checkJwt, (req, res) => {
     upload(req, res, (err: any) => {
         if (err) {
             res.status(400)
@@ -74,7 +88,7 @@ app.post("/api/items/s3-upload/", checkJwt, (req, res) => {
     })
 })
 
-app.post("/api/items/add/", checkJwt, (req, res) => {
+app.post("/api/items/add", checkJwt, (req, res) => {
     if (req.body) {
         let newItem: NewItem = req.body;
         if (newItem) {
@@ -107,7 +121,7 @@ app.post("/api/items/add/", checkJwt, (req, res) => {
     }
 });
 
-app.delete("/api/items/delete/", checkJwt, (req, res) => {
+app.delete("/api/items/delete", checkJwt, (req, res) => {
     if (req.body) {
         if (req.body.name) {
             Item.destroy({
