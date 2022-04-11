@@ -128,16 +128,21 @@ app.delete("/api/items/delete", checkJwt, (req, res) => {
                 where: { name: itemName }
             }).then(async (numOFRowsDeleted) => {
                 if (numOFRowsDeleted) {
-                    const response = await deleteItemFromS3(itemName);
-                    if (response) {
-                        if (response.Deleted.length > 0) {
+                    try {
+                        const response = await deleteItemFromS3(itemName);
+                        if (response.Deleted) {
                             res.status(200);
                             res.send("Deleted sucessfully")
                         } else {
-                            res.status(500);
+                            res.status(400);
                             res.send("item has been deleted from DB but item images failed delete")
                         }
+                    } catch (e: any) {
+                        res.status(500);
+                        res.send("item has been deleted from DB but item images failed delete")
                     }
+
+
                 }
                 if (!numOFRowsDeleted) {
                     res.status(200)
@@ -166,7 +171,10 @@ const deleteItemFromS3 = async (folder: string) => {
     };
     const listedObjects = await s3.listObjectsV2(listParams).promise();
     if (listedObjects.Contents.length === 0) {
-        return;
+        return {
+            Deleted: [],
+            Errors: []
+        };
     }
     const deleteParams = {
         Bucket: "samaria-item-images",
