@@ -1,9 +1,9 @@
 import path from "path";
 import {Router} from "express";
-import apiRouters from "./api";
+//import {authRoutes, nonAuthRoutes} from "./api";
 const routes = Router();
 // API Routes
-routes.use("/api", apiRouters);
+//routes.use("/api", apiRouters);
 
 if(process.env.NODE_ENV === 'production') {
   // If no API routes are hit, send the React app

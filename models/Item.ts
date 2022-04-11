@@ -1,4 +1,4 @@
-import { Table, Column, Model, AllowNull, HasMany } from 'sequelize-typescript'
+import { Table, Column, Model, AllowNull, HasMany, Unique } from 'sequelize-typescript'
 import { Size } from "./Size"
 
 @Table
@@ -6,6 +6,7 @@ export class Item extends Model {
 
 
     @AllowNull(false)
+    @Unique
     @Column name!: string;
 
     @AllowNull(false)
