@@ -23,7 +23,7 @@ const upload = multer({
     storage: multerS3({
         s3: s3,
         bucket: "samaria-item-images",
-        // acl: "public-read",
+        acl: "public-read",
         metadata: function (req: any, file: any, cb: any) {
             cb(null, { fieldName: file.fieldname });
         },
@@ -42,7 +42,6 @@ const upload = multer({
 
 
 const checkFileType = (file: any, cb: any) => {
-    console.log("fileChecker", file);
     const filetypes = /jpeg|jpg/;
     const mimetype = filetypes.test(file.mimetype);
     if (mimetype) {
