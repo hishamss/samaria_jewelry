@@ -164,7 +164,7 @@ const Admin = () => {
     const handleItemCoverImageChange = (e: any) => {
         SetShowCoverImageMessage(false);
         if (e.target.files[0]) {
-            if (e.target.files[0].size <= 1500000 && e.target.files[0].type === 'image/jpeg') {
+            if (e.target.files[0].size <= 500000 && e.target.files[0].type === 'image/jpeg') {
 
                 let tempFile = new File([e.target.files[0]], `main`, {
                     type: e.target.files[0].type,
@@ -172,7 +172,7 @@ const Admin = () => {
                 });
                 SetCoverItemImage(tempFile);
             } else {
-                alert("Item images have to be in JPG format and 1.5MB as max size")
+                alert("Item images have to be in JPG format and 0.5MB as max size")
                 e.target.value = null;
             }
         }
@@ -186,8 +186,8 @@ const Admin = () => {
             let uploadedFiles: File[] = e.target.files;
             let updatedFiles: File[] = [];
             for (let i = 0; i < uploadedFiles.length; i++) {
-                if (uploadedFiles[i].size > 1500000 || uploadedFiles[i].type !== 'image/jpeg') {
-                    alert("Item images have to be in JPG format and 1.5MB as max size")
+                if (uploadedFiles[i].size > 500000 || uploadedFiles[i].type !== 'image/jpeg') {
+                    alert("Item images have to be in JPG format and 0.5MB as max size")
                     e.target.value = null;
                     return
                 }
