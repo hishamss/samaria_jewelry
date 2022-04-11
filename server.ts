@@ -188,10 +188,10 @@ const deleteItemFromS3 = async (folder: string) => {
 
 }
 if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../../client/build')));
+    app.use(express.static(path.join(__dirname, '../client/build')));
     // If no API routes are hit, send the React app
     app.get("*", (req, res) => {
-        res.sendFile(path.join(__dirname, "../../client/build", "index.html"));
+        res.sendFile(path.join(__dirname, "../client/build", "index.html"));
     });
 } else {
     app.get("*", (req, res) => {
