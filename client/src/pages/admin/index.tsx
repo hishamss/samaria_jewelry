@@ -68,7 +68,7 @@ const Admin = () => {
                 type: itemType,
                 description: itemDescription,
                 price: itemPrice,
-                numOfOtherImage: 3,
+                numOfOtherImage: otherItemImages.length,
                 sizes: itemSizes
             }
             const formData = new FormData();

@@ -135,7 +135,7 @@ const Shop = () => {
             return (
               <Col key={item.id} className="gy-5" sm={12} md={4} lg={3} onClick={() => showItemDetails(item)}>
                 <img className="item-image" loading="lazy" key={item.id}
-                  decoding="async" src={"images/items/" + (item.name).replace(/ /g, "_") + "/main.jpg"} alt={item.name} />
+                  decoding="async" src={`https://samaria-item-images.s3.us-east-2.amazonaws.com/${(item.name).replace(/ /g, "+")}/main.jpg`} alt={item.name} />
               </Col>
             )
           })}
@@ -155,7 +155,7 @@ const Shop = () => {
                 <Carousel.Item>
                   <img
                     className="d-block w-100 other-images"
-                    src={"images/items/" + itemName.replace(/ /g, "_") + "/" + index + ".jpg"}
+                    src={`https://samaria-item-images.s3.us-east-2.amazonaws.com/${itemName.replace(/ /g, "+")}/${index+1}.jpg`}
                     loading="lazy"
                     decoding="async"
                     alt="other-images"
