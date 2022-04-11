@@ -34,23 +34,22 @@ const upload = multer({
             );
         },
     }),
-    limits: {fileSize: 1500000},
-    fileFilter: (req:any, file:any, cb:any) => {
+    limits: { fileSize: 1500000 },
+    fileFilter: (req: any, file: any, cb: any) => {
         checkFileType(file, cb);
     }
 }).array("images")
 
 
-const checkFileType = (file:any, cb:any) => {
+const checkFileType = (file: any, cb: any) => {
     console.log("fileChecker", file);
     const filetypes = /jpeg|jpg/;
-  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = filetypes.test(file.mimetype);
-  if (extname && mimetype) {
-    return cb(null, true);
-  } else {
-    cb("Error: Images Only");
-  }
+    const mimetype = filetypes.test(file.mimetype);
+    if (mimetype) {
+        return cb(null, true);
+    } else {
+        cb("Error: Images Only");
+    }
 }
 const { auth } = require('express-oauth2-jwt-bearer');
 const checkJwt = auth({
@@ -124,13 +123,28 @@ app.post("/api/items/add", checkJwt, (req, res) => {
 app.delete("/api/items/delete", checkJwt, (req, res) => {
     if (req.body) {
         if (req.body.name) {
+            let itemName = (req.body.name).toLocaleUpperCase();
             Item.destroy({
-                where: { name: (req.body.name).toLocaleUpperCase() }
-            }).then((numOFRowsDeleted) => {
-                res.status(200)
-                if(numOFRowsDeleted) res.send("Deleted sucessfully")
-                if(!numOFRowsDeleted) res.send("No item found with this name")
-               
+                where: { name: itemName }
+            }).then(async (numOFRowsDeleted) => {
+                if (numOFRowsDeleted) {
+                    const response = await deleteItemFromS3(itemName);
+                    if (response) {
+                        if (response.Deleted.length > 0) {
+                            res.status(200);
+                            res.send("Deleted sucessfully")
+                        } else {
+                            res.status(500);
+                            res.send("item has been deleted from DB but item images failed delete")
+                        }
+                    }
+                }
+                if (!numOFRowsDeleted) {
+                    res.status(200)
+                    res.send("No item found with this name")
+
+                }
+
             }).catch(e => {
                 res.status(400)
                 res.send("failed to delete")
@@ -145,6 +159,27 @@ app.delete("/api/items/delete", checkJwt, (req, res) => {
     }
 
 })
+const deleteItemFromS3 = async (folder: string) => {
+    const listParams = {
+        Bucket: "samaria-item-images",
+        Prefix: folder
+    };
+    const listedObjects = await s3.listObjectsV2(listParams).promise();
+    if (listedObjects.Contents.length === 0) {
+        return;
+    }
+    const deleteParams = {
+        Bucket: "samaria-item-images",
+        Delete: {
+            Objects: []
+        }
+    };
+    deleteParams.Delete.Objects = listedObjects.Contents.map((Content: any) => {
+        return { Key: Content.Key }
+    });
+    return await s3.deleteObjects(deleteParams).promise();
+
+}
 if (process.env.NODE_ENV === 'production') {
     // If no API routes are hit, send the React app
     app.get("*", (req, res) => {
