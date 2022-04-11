@@ -7,13 +7,16 @@ import { Form, Container, Table, Card } from "react-bootstrap";
 const Admin = () => {
     const coverImageRef = useRef<HTMLInputElement | null>(null);
     const otherImagesRef = useRef<HTMLInputElement | null>(null);
+    const [adminAction, SetAdminAction] = useState("");
     const [itemName, SetItemName] = useState("");
+    const [itemNameToDelete, SetItemNameToDelete] = useState("");
     const [itemType, SetItemType] = useState("");
     const [itemDescription, SetItemDescription] = useState("");
     const [itemPrice, SetItemPrice] = useState(0);
     const [noSizeQuantity, SetNoSizeQuantity] = useState(0);
     const [sizeWithQuantityArray, SetSizeWithQuantityArray] = useState("");
     const [itemSizes, SetItemSizes] = useState<AddedItemSize[]>([]);
+    const [itemNameToDeleteMessage, SetItemNameToDeleteMessage] = useState(false);
     const [ItemNameMessage, SetItemNameMessage] = useState(false);
     const [ItemTypeMessage, SetItemTypeMessage] = useState(false);
     const [ItemPriceMessage, SetItemPriceMessage] = useState(false);
@@ -22,7 +25,10 @@ const Admin = () => {
     const [JWTToken, SetJWTToken] = useState<string | undefined>();
     const [formSubmitMessage, SetFormSubmitMessage] = useState("");
     const [formSubmitMessageShow, SetFormSubmitMessageShow] = useState(false);
+    const [deleteFormSubmitMessage, SetDeleteFormSubmitMessage] = useState("");
+    const [deleteFormSubmitMessageShow, SetDeleteFormSubmitMessageShow] = useState(false);
     const [showLoadingMessage, SetShowLoadingMessage] = useState(false);
+    const [showDeleteLoadingMessage, SetShowDeleteLoadingMessage] = useState(false);
     const [coverItemImage, SetCoverItemImage] = useState<File | undefined>();
     const [showCoverImageMessage, SetShowCoverImageMessage] = useState(false);
     const [otherItemImages, SetOtherItemImages] = useState<File[]>([]);
@@ -38,7 +44,21 @@ const Admin = () => {
 
 
     })
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleDeleteSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        SetDeleteFormSubmitMessageShow(false);
+        if (itemNameToDelete !== "") {
+            SetShowDeleteLoadingMessage(true);
+            const deleteIteamReponse = await deleteItem(itemNameToDelete, JWTToken);
+            console.log("delete Items Reponse", deleteIteamReponse)
+            SetDeleteFormSubmitMessage(deleteIteamReponse.message);
+            SetShowDeleteLoadingMessage(false);
+            SetDeleteFormSubmitMessageShow(true);
+            SetItemNameToDelete("");
+        }
+        if (itemNameToDelete === "") SetItemNameToDeleteMessage(true);
+    }
+    const handleAddSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         SetFormSubmitMessageShow(false);
         if (itemName !== "" && itemType !== "" && itemPrice > 0 && itemSizes.length > 0 && coverItemImage !== undefined && otherItemImages.length > 0) {
@@ -62,7 +82,7 @@ const Admin = () => {
 
 
 
-            resetForm();
+            resetAddForm();
         }
         if (itemName === "") SetItemNameMessage(true);
         if (itemType === "") SetItemTypeMessage(true);
@@ -89,7 +109,7 @@ const Admin = () => {
         SetFormSubmitMessageShow(true);
 
     }
-    const resetForm = () => {
+    const resetAddForm = () => {
         SetItemName("")
         SetItemType("")
         SetItemDescription("")
@@ -186,13 +206,50 @@ const Admin = () => {
             {!isAuthenticated && (<button className="adminPageBtns" onClick={() => loginWithRedirect()}>Login</button>)}
         </div>
         <br></br>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+            {isAuthenticated && (
+                <Form.Group style={{ width: "50%" }}>
+                    <Form.Text>What would you like to do?</Form.Text>
+                    <Form.Control as="select" onChange={(e) => SetAdminAction(e.target.value)}>
+                        <option value="" selected disabled hidden>Action</option>
+                        <option value='Add Item'>Add Item</option>
+                        <option value='Delete Item'>Delete Item</option>
+                    </Form.Control>
+                </Form.Group>
+
+            )}
+        </div>
+        <br></br>
         {isLoading && (<div>Loading...</div>)}
-        {!isLoading && isAuthenticated && (
+        {!isLoading && isAuthenticated && adminAction === "Delete Item" && (
+            <div style={{ display: "flex", justifyContent: "center" }}>
+                <Card className="adminCard">
+                    <Card.Title>Delete Item</Card.Title>
+                    <Card.Body>
+                        <Form onSubmit={e => handleDeleteSubmit(e)}>
+                            <Form.Group>
+                                <Form.Label>Item Name</Form.Label>
+                                <Form.Control type="text" name="itemName" value={itemNameToDelete} onChange={(e) => { SetItemNameToDelete((e.target.value).toLocaleUpperCase()); SetItemNameToDeleteMessage(false) }} />
+                                <Form.Text className="formMessages text-muted" style={{ opacity: itemNameToDeleteMessage ? "1" : "0" }}>
+                                    Required
+                                </Form.Text>
+                            </Form.Group>
+                            <button style={{ display: !showDeleteLoadingMessage ? "inline" : "none" }} className="adminPageBtns" type="submit">Delete Item</button>
+                            <img style={{ display: showDeleteLoadingMessage ? "inline" : "none" }} src="loading.gif" alt="loading img" />
+                            <br></br>
+                            <br></br>
+                            <p className="formMessages" style={{ opacity: deleteFormSubmitMessageShow ? "1" : "0" }}>{deleteFormSubmitMessage}</p>
+                        </Form>
+                    </Card.Body>
+                </Card></div>
+
+        )}
+        {!isLoading && isAuthenticated && adminAction === "Add Item" && (
             <div style={{ display: "flex", justifyContent: "center" }}>
                 <Card className="adminCard">
                     <Card.Title>Add New Item</Card.Title>
                     <Card.Body>
-                        <Form onSubmit={e => handleSubmit(e)}>
+                        <Form onSubmit={e => handleAddSubmit(e)}>
                             <Form.Group>
                                 <Form.Label>Item Name</Form.Label>
                                 <Form.Control type="text" name="itemName" value={itemName} onChange={(e) => { SetItemName((e.target.value).toLocaleUpperCase()); SetItemNameMessage(false) }} />

@@ -125,9 +125,12 @@ app.delete("/api/items/delete", checkJwt, (req, res) => {
     if (req.body) {
         if (req.body.name) {
             Item.destroy({
-                where: { name: req.body.name }
-            }).then(() => {
-                res.status(200).end();
+                where: { name: (req.body.name).toLocaleUpperCase() }
+            }).then((numOFRowsDeleted) => {
+                res.status(200)
+                if(numOFRowsDeleted) res.send("Deleted sucessfully")
+                if(!numOFRowsDeleted) res.send("No item found with this name")
+               
             }).catch(e => {
                 res.status(400)
                 res.send("failed to delete")

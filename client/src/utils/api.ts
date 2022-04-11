@@ -34,7 +34,7 @@ export const addNewItem = async (newItem: NewItem, JWTToken:string|undefined): P
 export const deleteItem = async (itemName: string, JWTToken:string|undefined): Promise<APIMessage> => {
     let data = {name: itemName}
     try {
-        await axios({
+        const response = await axios({
             method: 'delete',
             url: "/api/items/delete",
             headers: {
@@ -44,7 +44,7 @@ export const deleteItem = async (itemName: string, JWTToken:string|undefined): P
             },
             data: data
         });
-        return {message: "Deleted sucessfully"}
+        return {message: response.data}
     } catch (e:any) {
         if(e.response.status === 400) return {message: e.response.data}
         if(e.response.status === 401) return {message: "UnAuthroized"}
