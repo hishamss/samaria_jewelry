@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./index.css";
 import { useAuth0 } from "@auth0/auth0-react";
 import { NewItem, AddedItemSize } from "../../types"
-import { addNewItem } from "../../utils/api";
+import { addNewItem, s3Upload, deleteItem } from "../../utils/api";
 import { Form, Container, Table, Card } from "react-bootstrap";
 const Admin = () => {
+    const coverImageRef = useRef<HTMLInputElement | null>(null);
+    const otherImagesRef = useRef<HTMLInputElement | null>(null);
     const [itemName, SetItemName] = useState("");
     const [itemType, SetItemType] = useState("");
     const [itemDescription, SetItemDescription] = useState("");
@@ -23,7 +25,7 @@ const Admin = () => {
     const [showLoadingMessage, SetShowLoadingMessage] = useState(false);
     const [coverItemImage, SetCoverItemImage] = useState<File | undefined>();
     const [showCoverImageMessage, SetShowCoverImageMessage] = useState(false);
-    const [otherItemImages, SetotherItemImages] = useState<File[]>([]);
+    const [otherItemImages, SetOtherItemImages] = useState<File[]>([]);
     const [showOtherImagesMessage, SetShowOtherImagesMessage] = useState(false);
     const { loginWithRedirect, logout, isAuthenticated, isLoading, getIdTokenClaims } = useAuth0();
     useEffect(() => {
@@ -36,10 +38,9 @@ const Admin = () => {
 
 
     })
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         SetFormSubmitMessageShow(false);
-
         if (itemName !== "" && itemType !== "" && itemPrice > 0 && itemSizes.length > 0 && coverItemImage !== undefined && otherItemImages.length > 0) {
             SetShowLoadingMessage(true);
             const newItem: NewItem = {
@@ -50,13 +51,17 @@ const Admin = () => {
                 numOfOtherImage: 3,
                 sizes: itemSizes
             }
-            addNewItem(newItem, JWTToken).then(result => {
-                SetShowLoadingMessage(false);
-                SetFormSubmitMessage(result.message);
-                SetFormSubmitMessageShow(true);
+            const formData = new FormData();
+            formData.append("folder", itemName)
+            formData.append("images", coverItemImage);
+            Array.from(otherItemImages).forEach((file, index) => {
+                formData.append("images", file);
             })
-            console.log('form submitted successfully')
-            console.log(newItem)
+
+            await uploadAndAddAPI(newItem, formData, JWTToken);
+
+
+
             resetForm();
         }
         if (itemName === "") SetItemNameMessage(true);
@@ -67,6 +72,23 @@ const Admin = () => {
         if (coverItemImage === undefined) SetShowCoverImageMessage(true);
         if (otherItemImages.length === 0) SetShowOtherImagesMessage(true);
     }
+
+    const uploadAndAddAPI = async (newItem: NewItem, formData: FormData, JWTToken: string | undefined) => {
+
+        const addItemResponse = await addNewItem(newItem, JWTToken);
+        if (addItemResponse.message === 'Added sucessfully') {
+            const uploadImagesResponse = await s3Upload(formData, JWTToken);
+            if (uploadImagesResponse.message !== 'images uploaded sucessfully') {
+                await deleteItem(itemName, JWTToken);
+                SetFormSubmitMessage(uploadImagesResponse.message);
+            } else {
+                SetFormSubmitMessage(addItemResponse.message);
+            }
+        }
+        SetShowLoadingMessage(false);
+        SetFormSubmitMessageShow(true);
+
+    }
     const resetForm = () => {
         SetItemName("")
         SetItemType("")
@@ -75,6 +97,10 @@ const Admin = () => {
         SetItemSizes([])
         SetSizeWithQuantityArray("");
         SetNoSizeQuantity(0);
+        SetCoverItemImage(undefined);
+        SetOtherItemImages([])
+        coverImageRef!.current!.value = '';
+        otherImagesRef!.current!.value = '';
     }
 
     const handleChangeQuantityForItemsWithNoSizes = (quant: number) => {
@@ -117,11 +143,15 @@ const Admin = () => {
     const handleItemCoverImageChange = (e: any) => {
         SetShowCoverImageMessage(false);
         if (e.target.files[0]) {
-            if (e.target.files[0].size <= 1000000 && e.target.files[0].type === 'image/jpeg') {
-                console.log("Cover Image pass");
-                SetCoverItemImage(e.target.files[0])
+            if (e.target.files[0].size <= 1500000 && e.target.files[0].type === 'image/jpeg') {
+
+                let tempFile = new File([e.target.files[0]], `main`, {
+                    type: e.target.files[0].type,
+                    lastModified: e.target.files[0].lastModified,
+                });
+                SetCoverItemImage(tempFile);
             } else {
-                alert("Item images have to be in JPG format and 1MB as max size")
+                alert("Item images have to be in JPG format and 1.5MB as max size")
                 e.target.value = null;
             }
         }
@@ -133,126 +163,137 @@ const Admin = () => {
         SetShowOtherImagesMessage(false);
         if (e.target.files.length > 0) {
             let uploadedFiles: File[] = e.target.files;
+            let updatedFiles: File[] = [];
             for (let i = 0; i < uploadedFiles.length; i++) {
-                if (uploadedFiles[i].size > 1000000 || uploadedFiles[i].type !== 'image/jpeg') {
-                    alert("Item images have to be in JPG format and 1MB as max size")
+                if (uploadedFiles[i].size > 1500000 || uploadedFiles[i].type !== 'image/jpeg') {
+                    alert("Item images have to be in JPG format and 1.5MB as max size")
                     e.target.value = null;
                     return
                 }
+                let tempFile = new File([uploadedFiles[i]], `${i + 1}`, {
+                    type: uploadedFiles[i].type,
+                    lastModified: uploadedFiles[i].lastModified,
+                });
+                updatedFiles.push(tempFile);
             }
-
+            SetOtherItemImages(currentArray => [...currentArray, ...updatedFiles]);
         }
-        SetotherItemImages(e.target.files)
+
     }
     return <Container>
-        <div>
+        <div style={{ display: "flex", justifyContent: "end" }}>
             {isAuthenticated && (<button className="adminPageBtns" onClick={() => logout()}>logout</button>)}
             {!isAuthenticated && (<button className="adminPageBtns" onClick={() => loginWithRedirect()}>Login</button>)}
         </div>
         <br></br>
         {isLoading && (<div>Loading...</div>)}
         {!isLoading && isAuthenticated && (
-            <div style={{display:"flex", justifyContent:"center"}}>
-            <Card className="adminCard">
-                <Card.Title>Add New Item</Card.Title>
-                <Card.Body>
-                <Form onSubmit={e => handleSubmit(e)}>
-                <Form.Group>
-                    <Form.Label>Item Name</Form.Label>
-                    <Form.Control type="text" name="itemName" value={itemName} onChange={(e) => { SetItemName((e.target.value).toLocaleUpperCase()); SetItemNameMessage(false) }} />
-                    <Form.Text className="formMessages text-muted" style={{ opacity: ItemNameMessage ? "1" : "0" }}>
-                        Required
-                    </Form.Text>
-                </Form.Group>
-                <Form.Group>
-                    <Form.Label>Item Type</Form.Label>
-                    <Form.Control as="select" name="type" onChange={(e) => { handleChangeItemType(e.target.value); SetItemTypeMessage(false) }} value={itemType}>
-                        <option value="" selected disabled hidden>Item Type</option>
-                        <option value='Earing'>Earing</option>
-                        <option value='Pendant'>Pendant</option>
-                        <option value='Ring'>Ring</option>
-                    </Form.Control>
-                    <Form.Text className="formMessages text-muted" style={{ opacity: ItemTypeMessage ? "1" : "0" }}>
-                        Required
-                    </Form.Text>
-                </Form.Group>
-                <Form.Group>
-                    <Form.Label>Description</Form.Label>
-                    <Form.Control as="textarea" value={itemDescription} name="description" maxLength={250} onChange={(e) => SetItemDescription(e.target.value)}></Form.Control>
-                    <Form.Text className="formMessages text-muted" style={{ opacity: 0 }}>
-                        Required
-                    </Form.Text>
-                </Form.Group>
-                <Form.Group>
-                    <Form.Label>Price</Form.Label>
-                    <Form.Control
-                        value={itemPrice} type="number" name="price" min="1" onChange={(e) => { SetItemPrice(Number.parseFloat(e.target.value)); SetItemPriceMessage(false) }} >
-                    </Form.Control>
-                    <Form.Text className="formMessages text-muted" style={{ opacity: ItemPriceMessage ? "1" : "0" }}>
-                        Price Must be greater than zero
-                    </Form.Text>
-                </Form.Group>
-                {itemType !== 'Ring' ?
-                    <Form.Group>
-                        <Form.Label>Quantity</Form.Label>
-                        <Form.Control type="number" value={noSizeQuantity} name="quantity" min="1" onChange={(e) => { handleChangeQuantityForItemsWithNoSizes(Number.parseInt(e.target.value)); SetItemQuantityMessage(false); SetNoSizeQuantity(Number.parseInt(e.target.value)) }
-                        } />
-                        <Form.Text className="formMessages text-muted" style={{ opacity: ItemQuantityMessage ? "1" : "0" }}>Quantity Must be greater than zero</Form.Text>
-                    </Form.Group>
-                    : null}
-                {itemType === 'Ring' ?
+            <div style={{ display: "flex", justifyContent: "center" }}>
+                <Card className="adminCard">
+                    <Card.Title>Add New Item</Card.Title>
+                    <Card.Body>
+                        <Form onSubmit={e => handleSubmit(e)}>
+                            <Form.Group>
+                                <Form.Label>Item Name</Form.Label>
+                                <Form.Control type="text" name="itemName" value={itemName} onChange={(e) => { SetItemName((e.target.value).toLocaleUpperCase()); SetItemNameMessage(false) }} />
+                                <Form.Text className="formMessages text-muted" style={{ opacity: ItemNameMessage ? "1" : "0" }}>
+                                    Required
+                                </Form.Text>
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Item Type</Form.Label>
+                                <Form.Control as="select" name="type" onChange={(e) => { handleChangeItemType(e.target.value); SetItemTypeMessage(false) }} value={itemType}>
+                                    <option value="" selected disabled hidden>Item Type</option>
+                                    <option value='Earing'>Earing</option>
+                                    <option value='Pendant'>Pendant</option>
+                                    <option value='Ring'>Ring</option>
+                                </Form.Control>
+                                <Form.Text className="formMessages text-muted" style={{ opacity: ItemTypeMessage ? "1" : "0" }}>
+                                    Required
+                                </Form.Text>
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Description</Form.Label>
+                                <Form.Control as="textarea" value={itemDescription} name="description" maxLength={250} onChange={(e) => SetItemDescription(e.target.value)}></Form.Control>
+                                <Form.Text className="formMessages text-muted" style={{ opacity: 0 }}>
+                                    Required
+                                </Form.Text>
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Price</Form.Label>
+                                <Form.Control
+                                    value={itemPrice} type="number" name="price" min="1" onChange={(e) => { SetItemPrice(Number.parseFloat(e.target.value)); SetItemPriceMessage(false) }} >
+                                </Form.Control>
+                                <Form.Text className="formMessages text-muted" style={{ opacity: ItemPriceMessage ? "1" : "0" }}>
+                                    Price Must be greater than zero
+                                </Form.Text>
+                            </Form.Group>
+                            {itemType !== 'Ring' ?
+                                <Form.Group>
+                                    <Form.Label>Quantity</Form.Label>
+                                    <Form.Control type="number" value={noSizeQuantity} name="quantity" min="1" onChange={(e) => { handleChangeQuantityForItemsWithNoSizes(Number.parseInt(e.target.value)); SetItemQuantityMessage(false); SetNoSizeQuantity(Number.parseInt(e.target.value)) }
+                                    } />
+                                    <Form.Text className="formMessages text-muted" style={{ opacity: ItemQuantityMessage ? "1" : "0" }}>Quantity Must be greater than zero</Form.Text>
+                                </Form.Group>
+                                : null}
+                            {itemType === 'Ring' ?
 
 
-                    [<Form.Group>
-                        <Form.Label>Size:Quantity</Form.Label>
-                        <Form.Control type="text" value={sizeWithQuantityArray} placeholder="size:quantity, e.g., 7:3 means size 7 has quantity 3" onChange={(e) => { SetSizeWithQuantityArray(e.target.value); SetItemSizeMessage(false) }} />
-                        <div className="input-group-append">
-                            <button className="adminPageBtns" onClick={e => handleAddSizeQuantity(e)}>Add Size</button>
-                        </div>
+                                [<Form.Group>
+                                    <Form.Label>Size:Quantity</Form.Label>
+                                    <Form.Control type="text" value={sizeWithQuantityArray} placeholder="size:quantity, e.g., 7:3 means size 7 has quantity 3" onChange={(e) => { SetSizeWithQuantityArray(e.target.value); SetItemSizeMessage(false) }} />
+                                    <div className="input-group-append">
+                                        <button className="adminPageBtns" onClick={e => handleAddSizeQuantity(e)}>Add Size</button>
+                                    </div>
 
-                        <Form.Text className="formMessages text-muted" style={{ opacity: ItemSizeMessage ? "1" : "0" }}>Size and quantity must be added for this type</Form.Text>
-                    </Form.Group>,
+                                    <Form.Text className="formMessages text-muted" style={{ opacity: ItemSizeMessage ? "1" : "0" }}>Size and quantity must be added for this type</Form.Text>
+                                </Form.Group>,
 
-                    <Table striped bordered hover>
-                        <thead>
-                            <tr>
-                                <th className="w-50">Size</th>
-                                <th className="w-50">Quantity</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-
-                            {itemSizes.map((sizeQantity) =>
-                                <tr>
-                                    <td>{sizeQantity.size}</td>
-                                    <td>{sizeQantity.quantity}</td>
-                                </tr>
-                            )}
-
-                        </tbody>
-                    </Table>]
+                                <Table striped bordered hover>
+                                    <thead>
+                                        <tr>
+                                            <th className="w-50">Size</th>
+                                            <th className="w-50">Quantity</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
 
 
-                    : null}
+                                        {itemSizes.map((sizeQantity) =>
+                                            <tr>
+                                                <td>{sizeQantity.size}</td>
+                                                <td>{sizeQantity.quantity}</td>
+                                            </tr>
+                                        )}
 
-                <p className="formMessages" style={{ opacity: formSubmitMessageShow ? "1" : "0" }}>{formSubmitMessage}</p>
-                <p className="formMessages" style={{ opacity: showLoadingMessage ? "1" : "0" }}>Loading....</p>
-                <Form.Group>
-                    <Form.Label>Item Cover Image</Form.Label>
-                    <Form.Control type="file" accept="image/jpeg" onChange={(e) => handleItemCoverImageChange(e)} />
-                    <Form.Text className="formMessages text-muted" style={{ opacity: showCoverImageMessage ? "1" : "0" }}>Required</Form.Text>
-                </Form.Group>
+                                    </tbody>
+                                </Table>]
 
-                <Form.Group>
-                    <Form.Label>Item Other Images</Form.Label>
-                    <Form.Control type="file" accept="image/jpeg" multiple onChange={(e) => handleItemOtherImagesChange(e)} />
-                    <Form.Text className="formMessages text-muted" style={{ opacity: showOtherImagesMessage ? "1" : "0" }}>At least one image required</Form.Text>
-                </Form.Group>
-                <button className="adminPageBtns" type="submit">Add Item</button>
-            </Form>
-                </Card.Body>
-            </Card>
+
+                                : null}
+
+
+                            <Form.Group>
+                                <Form.Label>Item Cover Image</Form.Label>
+                                <Form.Control ref={coverImageRef} type="file" accept="image/jpeg" onChange={(e) => handleItemCoverImageChange(e)} />
+                                <Form.Text className="formMessages text-muted" style={{ opacity: showCoverImageMessage ? "1" : "0" }}>Required</Form.Text>
+                            </Form.Group>
+
+                            <Form.Group>
+                                <Form.Label>Item Other Images</Form.Label>
+                                <Form.Control ref={otherImagesRef} type="file" accept="image/jpeg" multiple onChange={(e) => handleItemOtherImagesChange(e)} />
+                                <Form.Text className="formMessages text-muted" style={{ opacity: showOtherImagesMessage ? "1" : "0" }}>At least one image required</Form.Text>
+                            </Form.Group>
+
+                            <button style={{ display: !showLoadingMessage ? "inline" : "none" }} className="adminPageBtns" type="submit">Add Item</button>
+                            <img style={{ display: showLoadingMessage ? "inline" : "none" }} src="loading.gif" alt="loading img" />
+                            <br></br>
+                            <br></br>
+                            <p className="formMessages" style={{ opacity: formSubmitMessageShow ? "1" : "0" }}>{formSubmitMessage}</p>
+
+                        </Form>
+                    </Card.Body>
+                </Card>
             </div>
         )}
     </Container>

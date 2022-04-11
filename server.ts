@@ -10,9 +10,37 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+let multer = require("multer");
+let aws = require("aws-sdk");
+let multerS3 = require("multer-s3");
+aws.config.update({
+    secretAccessKey: process.env.AWS_KEY,
+    accessKeyId: process.env.AWS_ID,
+    region: "us-east-2",
+})
+let s3 = new aws.S3();
+const upload = multer({
+    storage: multerS3({
+        s3: s3,
+        bucket: "samaria-item-images",
+        // acl: "public-read",
+        metadata: function (req: any, file: any, cb: any) {
+            cb(null, { fieldName: file.fieldname });
+        },
+        key: function (req: any, file: any, cb: any) {
+            cb(
+                null,
+                `${req.body.folder}/${file.originalname}.jpg`
+            );
+        },
+    })
+}).array("images")
+
+
+
 const { auth } = require('express-oauth2-jwt-bearer');
 const checkJwt = auth({
-    audience: "3VgqmK6whmqGeTXFpF9afOmjvUPOXN0Y",
+    audience: process.env.AUTH0_AUDIENCE,
     issuerBaseURL: process.env.AUTH0_DOMAIN
 })
 
@@ -33,7 +61,20 @@ app.get("/api/items/", (req, res) => {
         .catch(e => console.log(e))
 });
 
-app.post("/api/items/add", checkJwt, (req, res) => {
+app.post("/api/items/s3-upload/", checkJwt, (req, res) => {
+    upload(req, res, (err: any) => {
+        if (err) {
+            res.status(400)
+            res.send("Failed to upload")
+        } else {
+            res.status(200)
+            res.send("Images uploaded sucessfully");
+        }
+
+    })
+})
+
+app.post("/api/items/add/", checkJwt, (req, res) => {
     if (req.body) {
         let newItem: NewItem = req.body;
         if (newItem) {
@@ -48,9 +89,9 @@ app.post("/api/items/add", checkJwt, (req, res) => {
                 }
                 ).catch(e => {
                     let errorMessage = ""
-                    if(e.name && e.name === 'SequelizeUniqueConstraintError') {
+                    if (e.name && e.name === 'SequelizeUniqueConstraintError') {
                         errorMessage = "Item already exists"
-                    }else {
+                    } else {
                         errorMessage = e.message
                     }
                     res.status(400)
@@ -60,11 +101,33 @@ app.post("/api/items/add", checkJwt, (req, res) => {
             res.status(400)
             res.send("Incomplete request")
         }
-    }else {
+    } else {
         res.status(400)
         res.send("Incomplete request")
     }
 });
+
+app.delete("/api/items/delete/", checkJwt, (req, res) => {
+    if (req.body) {
+        if (req.body.name) {
+            Item.destroy({
+                where: { name: req.body.name }
+            }).then(() => {
+                res.status(200).end();
+            }).catch(e => {
+                res.status(400)
+                res.send("failed to delete")
+            })
+        } else {
+            res.status(400)
+            res.send("Incomplete request")
+        }
+    } else {
+        res.status(400)
+        res.send("Incomplete request")
+    }
+
+})
 if (process.env.NODE_ENV === 'production') {
     // If no API routes are hit, send the React app
     app.get("*", (req, res) => {

@@ -6,7 +6,7 @@ export const getStoreItems = async (): Promise<Item[]> => {
         const { data } = await axios.get("/api/items/");
         return (data as Item[]);
     } catch (e) {
-        console.log(e);
+      
         return [];
     }
 }
@@ -15,7 +15,7 @@ export const addNewItem = async (newItem: NewItem, JWTToken:string|undefined): P
     try {
         await axios({
             method: 'post',
-            url: "/api/items/add",
+            url: "/api/items/add/",
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
@@ -28,5 +28,43 @@ export const addNewItem = async (newItem: NewItem, JWTToken:string|undefined): P
         if(e.response.status === 400) return {message: e.response.data}
         if(e.response.status === 401) return {message: "UnAuthroized"}
         return {message: "Internal Server Error"}
+    }
+}
+
+export const deleteItem = async (itemName: string, JWTToken:string|undefined): Promise<APIMessage> => {
+    let data = {name: itemName}
+    try {
+        await axios({
+            method: 'delete',
+            url: "/api/items/delete/",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + JWTToken
+            },
+            data: data
+        });
+        return {message: "Deleted sucessfully"}
+    } catch (e:any) {
+        if(e.response.status === 400) return {message: e.response.data}
+        if(e.response.status === 401) return {message: "UnAuthroized"}
+        return {message: "Internal Server Error"}
+    }
+}
+
+export const s3Upload = async (formData:FormData, JWTToken:string|undefined):Promise<APIMessage> => {
+    try{
+      
+            await axios.post("/api/items/s3-upload/", formData , {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    "Authorization": "Bearer " + JWTToken
+                }
+            });
+            return {message: "images uploaded sucessfully"}
+            
+
+    }catch(e:any) {
+        return {message: e.response.data}
     }
 }
