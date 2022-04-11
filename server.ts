@@ -56,9 +56,9 @@ const checkJwt = auth({
     issuerBaseURL: process.env.AUTH0_DOMAIN
 })
 
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../client/build')));
-}
+// if (process.env.NODE_ENV === 'production') {
+//     app.use(express.static(path.join(__dirname, '../client/build')));
+// }
 
 
 
@@ -188,6 +188,7 @@ const deleteItemFromS3 = async (folder: string) => {
 
 }
 if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../../client/build')));
     // If no API routes are hit, send the React app
     app.get("*", (req, res) => {
         res.sendFile(path.join(__dirname, "../../client/build", "index.html"));
