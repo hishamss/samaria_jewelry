@@ -56,12 +56,6 @@ const checkJwt = auth({
     issuerBaseURL: process.env.AUTH0_DOMAIN
 })
 
-// if (process.env.NODE_ENV === 'production') {
-//     app.use(express.static(path.join(__dirname, '../client/build')));
-// }
-
-
-
 
 
 app.get("/api/items", (req, res) => {

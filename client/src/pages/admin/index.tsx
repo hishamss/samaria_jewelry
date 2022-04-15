@@ -98,13 +98,14 @@ const Admin = () => {
         const addItemResponse = await addNewItem(newItem, JWTToken);
         if (addItemResponse.message === 'Added sucessfully') {
             const uploadImagesResponse = await s3Upload(formData, JWTToken);
-            console.log(uploadImagesResponse.message)
             if (uploadImagesResponse.message !== 'images uploaded sucessfully') {
                 await deleteItem(itemName, JWTToken);
                 SetFormSubmitMessage(uploadImagesResponse.message);
             } else {
                 SetFormSubmitMessage(addItemResponse.message);
             }
+        }else {
+            SetFormSubmitMessage(addItemResponse.message);
         }
         SetShowLoadingMessage(false);
         SetFormSubmitMessageShow(true);
