@@ -23,7 +23,7 @@ const upload = multer({
     storage: multerS3({
         s3: s3,
         bucket: "samaria-item-images",
-        acl: "public-read",
+        //acl: "public-read",
         metadata: function (req: any, file: any, cb: any) {
             cb(null, { fieldName: file.fieldname });
         },
@@ -76,6 +76,7 @@ app.get("/api/items", (req, res) => {
 app.post("/api/items/s3-upload", checkJwt, (req, res) => {
     upload(req, res, (err: any) => {
         if (err) {
+            console.log(err)
             res.status(400)
             res.send("Failed to upload")
         } else {
