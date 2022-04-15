@@ -92,7 +92,7 @@ const Cart = () => {
                                 return (<tr key={index}>
                                     <td className="cart-table-first">
                                         <img className="cart-image" loading="lazy"
-                                            decoding="async" src={"images/items/" + (item.name).replace(/ /g, "_") + "/main.jpg"} alt={item.name} />
+                                            decoding="async" src={`https://samaria-item-images.s3.us-east-2.amazonaws.com/${(item.name).replace(/ /g, "+")}/main.jpg`} alt={item.name} />
                                         <p className="cart-table-items">{item.name}</p>
                                     </td>
                                     <td className="cart-table-other"><p className="cart-table-items">{item.size}</p></td>
