@@ -133,7 +133,7 @@ const Shop = () => {
           {storeItems.map((item: Item) => {
 
             return (
-              <Col key={item.id} className="gy-5" sm={12} md={4} lg={3} onClick={() => showItemDetails(item)}>
+              <Col key={item.id} className="gy-5" sm={12} md={6} lg={6} xl={4} xxl={3} onClick={() => showItemDetails(item)}>
                 <img className="item-image" loading="lazy" key={item.id}
                   decoding="async" src={`https://samaria-item-images.s3.us-east-2.amazonaws.com/${(item.name).replace(/ /g, "+")}/main.jpg`} alt={item.name} />
               </Col>
