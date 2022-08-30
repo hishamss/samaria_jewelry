@@ -14,6 +14,7 @@
     color: #3A3E40;
     font-family: 'Lustria', serif;
 }
+
 .cart-table th {
     font-weight: normal;
     font-size: 24px;
@@ -27,14 +28,15 @@
 }
 
 .cart-table-first {
-    padding-left: 120px !important; 
+    padding-left: 120px !important;
     text-align: left;
 }
-.cart-table-other{
+
+.cart-table-other {
     vertical-align: middle;
 }
 
-.cart-image{
+.cart-image {
     display: inline;
     width: 104px;
     aspect-ratio: 1/1;
@@ -45,7 +47,7 @@
 
 .cart-table-items {
     display: inline;
-font-size: 20px;
+    font-size: 20px;
 }
 
 .cart-table-items div {
@@ -55,10 +57,10 @@ font-size: 20px;
     opacity: 0.8;
     padding-left: 10px;
     padding-right: 10px;
-    width:20px;
+    width: 20px;
 }
 
-.increase-quan{
+.increase-quan {
     color: #81D8D0;
     font-size: 30px;
     margin-right: 20px;
@@ -67,7 +69,7 @@ font-size: 20px;
 
 }
 
-.decrease-quan{
+.decrease-quan {
     color: #E0DEDE;
     font-size: 30px;
     margin-left: 20px;
@@ -75,7 +77,8 @@ font-size: 20px;
     opacity: 0.8;
 }
 
-.increase-quan:hover, .decrease-quan:hover {
+.increase-quan:hover,
+.decrease-quan:hover {
     opacity: 1;
 }
 
@@ -85,7 +88,7 @@ font-size: 20px;
 
 .cart-table-delete-item:hover {
     color: red;
-    
+
 }
 
 .empty-cart {
@@ -108,9 +111,17 @@ font-size: 20px;
     color: white;
     font-size: 20px;
     border-radius: 5px;
-    border:0;
+    border: 0;
 }
 
 #go-payment:hover {
     background: #81D8D0;
+}
+
+.stripe-card-element {
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    height: 38px;
+    padding: 0.375rem 0.75rem;
+    line-height: 1.5;
 }

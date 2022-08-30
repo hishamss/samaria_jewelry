@@ -5,8 +5,11 @@ import { useDispatch } from "react-redux";
 import { UpdateCartCount } from "../../redux/action-creators"
 import { Formik, Field } from "formik"
 import * as yup from 'yup'
+import { Elements, CardElement } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import "./index.css";
 
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUPLIC_KEY!);
 
 const Cart = () => {
     const checkoutFromInitialValues: CheckoutFormValues = {
@@ -27,9 +30,9 @@ const Cart = () => {
         state: yup.string().required("Required"),
         zip: yup.string().required("Required").matches(/^[0-9]+$/, "Invalid zip code").min(5, 'Invalid zip code').max(5, 'Invalid zip code')
     })
-    const addionalStateValidation = (value:any) => {
+    const addionalStateValidation = (value: any) => {
         let error;
-        if(value === 'state') {
+        if (value === 'state') {
             error = "Required"
         }
         return error;
@@ -251,13 +254,16 @@ const Cart = () => {
                             />
                             {touched.zip && errors.zip ? <div className="text-start formik_err_msg">{errors.zip}</div> : null}
                         </Form.Group>
-
+                        <Elements stripe={stripePromise}>
+                            <div className="stripe-card-element"><CardElement /></div>
+                        </Elements>
                         <button disabled={isSubmitting} className="w-50 mt-3" id='go-payment' type='submit'>Continue to payment</button>
                     </Form>
                 )}
             </Formik>
 
         </div>
+
     </div>
 }
 
