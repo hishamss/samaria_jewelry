@@ -114,10 +114,15 @@
     border: 0;
 }
 
-#go-payment:hover {
+#go-payment:hover{
     background: #81D8D0;
 }
 
+#go-payment:disabled,
+#go-payment[disabled]{
+ opacity: 0.2;
+ pointer-events: none;
+}
 .stripe-card-element {
     border: 1px solid #ced4da;
     border-radius: 0.25rem;

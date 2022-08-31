@@ -5,13 +5,15 @@ import { useDispatch } from "react-redux";
 import { UpdateCartCount } from "../../redux/action-creators"
 import { Formik, Field } from "formik"
 import * as yup from 'yup'
-import { Elements, CardElement } from '@stripe/react-stripe-js';
+import { Elements, CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import "./index.css";
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUPLIC_KEY!);
 
-const Cart = () => {
+
+const CartChild = () => {
+    const stripe = useStripe();
+    const elements = useElements();
     const checkoutFromInitialValues: CheckoutFormValues = {
         firstName: '',
         lastName: '',
@@ -38,6 +40,7 @@ const Cart = () => {
         return error;
     }
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const [isStripeInvalid, setIsStripeInvalid] = useState(false);
     let currentSubtotal = 0;
     const dispatch = useDispatch();
     useEffect(() => {
@@ -49,7 +52,6 @@ const Cart = () => {
     const deleteItem = (item: CartItem) => {
         let currentCart: CartItem[] = JSON.parse(localStorage.getItem("samaria-cart")!);
         let indexToDelete: number = currentCart.findIndex(currItem => (currItem.id === item.id) && (currItem.size === item.size));
-        console.log(indexToDelete)
         currentCart.splice(indexToDelete, 1);
         localStorage.setItem("samaria-cart", JSON.stringify(currentCart));
         setCartItems(currentCart);
@@ -59,7 +61,6 @@ const Cart = () => {
     const increaseQuantity = (item: CartItem) => {
         let currentCart: CartItem[] = JSON.parse(localStorage.getItem("samaria-cart")!);
         let indexToUpdate: number = currentCart.findIndex(currItem => (currItem.id === item.id) && (currItem.size === item.size));
-        console.log(indexToUpdate)
         currentCart[indexToUpdate].quantity += 1;
         localStorage.setItem("samaria-cart", JSON.stringify(currentCart));
         setCartItems(currentCart);
@@ -124,10 +125,55 @@ const Cart = () => {
             <Formik
                 initialValues={checkoutFromInitialValues}
                 validationSchema={FormikValidationSchema}
-                onSubmit={(values, { setSubmitting }) => {
+                onSubmit={async (values, { setSubmitting }) => {
+                    setIsStripeInvalid(false);
                     setSubmitting(true)
-                    alert(JSON.stringify(values, null, 2));
-                    setSubmitting(false);
+                    
+                    if (stripe && elements) {
+                        const cardElement = elements.getElement(CardElement);
+                        if (!cardElement) return
+                        
+                        // Use your card Element with other Stripe.js APIs
+                        const { error, paymentMethod } = await stripe.createPaymentMethod({
+                            type: 'card',
+                            card: cardElement,
+                        });
+                        if (error) {
+                            setSubmitting(false);
+                            setIsStripeInvalid(true);
+                            return 
+                        }
+
+                        if(!paymentMethod?.id) {
+                            alert("failed to generate payment token, try again")
+                            return
+                        }
+
+                        if(cartItems.length === 0) {
+                            alert("cart is empty")
+                            return
+                        }
+                        
+                        let order = {
+                            buyerInfo: {
+                                firstname: values.firstName,
+                                lastname: values.lastName,
+                                email: values.email,
+                                address1: values.address1,
+                                address2: values.address2,
+                                state: values.state,
+                                zip: values.zip
+                            },
+                            cartItems: cartItems,
+                            claimedAmount: currentSubtotal,
+                            stripeToken: paymentMethod?.id
+                        } 
+                        cardElement?.clear();
+                        alert(JSON.stringify(order, null, 2));
+                        setSubmitting(false);
+                    }
+                    
+                    
                 }}
 
             >
@@ -254,10 +300,18 @@ const Cart = () => {
                             />
                             {touched.zip && errors.zip ? <div className="text-start formik_err_msg">{errors.zip}</div> : null}
                         </Form.Group>
-                        <Elements stripe={stripePromise}>
-                            <div className="stripe-card-element"><CardElement /></div>
-                        </Elements>
-                        <button disabled={isSubmitting} className="w-50 mt-3" id='go-payment' type='submit'>Continue to payment</button>
+                        <Form.Group>
+                            <div className="stripe-card-element">
+                                    <CardElement/>
+                                </div> 
+                                {isStripeInvalid ? <div className="text-start formik_err_msg">Invalid Card Information</div> : null}
+                        </Form.Group>
+
+                        <button disabled={isSubmitting || cartItems.length === 0} className="w-50 mt-3" id='go-payment' type='submit'>
+                            Continue to payment</button>
+                            {isSubmitting ?   <div><img src="images/loading.gif" alt="loading" width={100} height={100}/></div> : null}
+                           
+                          
                     </Form>
                 )}
             </Formik>
@@ -267,4 +321,8 @@ const Cart = () => {
     </div>
 }
 
+const Cart = () => {
+    const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUPLIC_KEY!);
+    return <Elements stripe={stripePromise}><CartChild/></Elements>
+}
 export default Cart;
