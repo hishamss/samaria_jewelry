@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Table, Form } from "react-bootstrap"
-import { CartItem, CheckoutFormValues } from "../../types";
+import { CartItem, CheckoutFormValues, Order } from "../../types";
 import { useDispatch } from "react-redux";
 import { UpdateCartCount } from "../../redux/action-creators"
 import { Formik, Field } from "formik"
 import * as yup from 'yup'
 import { Elements, CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import { processPayment } from "../../utils/api";
 import "./index.css";
 
 
@@ -154,7 +155,7 @@ const CartChild = () => {
                             return
                         }
                         
-                        let order = {
+                        let order:Order = {
                             buyerInfo: {
                                 firstname: values.firstName,
                                 lastname: values.lastName,
@@ -165,11 +166,14 @@ const CartChild = () => {
                                 zip: values.zip
                             },
                             cartItems: cartItems,
-                            claimedAmount: currentSubtotal,
+                            claimedPrice: currentSubtotal,
                             stripeToken: paymentMethod?.id
                         } 
                         cardElement?.clear();
-                        alert(JSON.stringify(order, null, 2));
+                        // console.log('order', order);
+                        processPayment(order).then(result => {
+                            console.log("processPayment", result);
+                        })
                         setSubmitting(false);
                     }
                     

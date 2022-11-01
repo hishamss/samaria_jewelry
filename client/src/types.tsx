@@ -58,6 +58,23 @@ export interface APIMessage {
     message: string
 }
 
+export interface Order {
+        buyerInfo: {
+            firstname: string,
+            lastname: string,
+            email: string,
+            address1: string,
+            address2: string,
+            state: string,
+            zip: string
+        },
+        cartItems: CartItem[],
+        claimedPrice: number,
+        stripeToken: string
+    }
+
+    
+
 
 
 
