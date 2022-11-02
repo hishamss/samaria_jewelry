@@ -50,7 +50,6 @@ const Admin = () => {
         if (itemNameToDelete !== "") {
             SetShowDeleteLoadingMessage(true);
             const deleteIteamReponse = await deleteItem(itemNameToDelete, JWTToken);
-            console.log("delete Items Reponse", deleteIteamReponse)
             SetDeleteFormSubmitMessage(deleteIteamReponse.message);
             SetShowDeleteLoadingMessage(false);
             SetDeleteFormSubmitMessageShow(true);

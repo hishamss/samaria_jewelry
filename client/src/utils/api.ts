@@ -1,9 +1,9 @@
 
 import axios from 'axios';
-import { Item, NewItem, APIMessage } from "../types";
+import { Item, NewItem, APIMessage, Order } from "../types";
 export const getStoreItems = async (): Promise<Item[]> => {
     try {
-        const { data } = await axios.get("/api/items");
+        const { data } = await axios.get("/api/items/getall");
         return (data as Item[]);
     } catch (e) {
       
@@ -65,6 +65,20 @@ export const s3Upload = async (formData:FormData, JWTToken:string|undefined):Pro
             
 
     }catch(e:any) {
+        return {message: e.response.data}
+    }
+}
+
+export const processPayment = async (order: Order): Promise<any> => {
+    try {
+        let response = await axios.post("/api/items/order", JSON.stringify(order), {
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+        });
+        return response;
+    } catch (e:any) {
         return {message: e.response.data}
     }
 }

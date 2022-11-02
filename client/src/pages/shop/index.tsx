@@ -29,7 +29,6 @@ const Shop = () => {
   }
 
   const addItemToStorage = (item: CartItem) => {
-    console.log("cartItem:", item)
     let myCart = localStorage.getItem("samaria-cart");
     // if cart empty
     if (!myCart) {
@@ -39,7 +38,6 @@ const Shop = () => {
     // if cart not empty
     if (myCart) {
       let currentCart: CartItem[] = JSON.parse(myCart);
-      console.log(currentCart)
       currentCart.forEach((inCartItem, index) => {
         if(inCartItem.id === item.id && inCartItem.size === item.size) {
           item.quantity =  inCartItem.quantity + 1;

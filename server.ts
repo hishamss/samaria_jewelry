@@ -4,8 +4,10 @@ import { Item } from "./models/Item"
 import { Size } from "./models/Size"
 import { sequelize } from "./db_config/sequelize"
 import * as dotenv from "dotenv";
-import { NewItem } from "./types";
+import { NewItem, Order, CartItem, CartItemAvailableQuantity } from "./types";
+import { CurrencyCodes } from "validator/lib/isISO4217";
 dotenv.config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const app = express();
 const PORT = process.env.PORT || 3001;
 app.use(express.urlencoded({ extended: true }));
@@ -58,7 +60,7 @@ const checkJwt = auth({
 
 
 
-app.get("/api/items", (req, res) => {
+app.get("/api/items/getall", (req, res) => {
     Item.findAll({ include: [Size] })
         .then(items => {
             res.json(items)
@@ -80,6 +82,102 @@ app.post("/api/items/s3-upload", checkJwt, (req, res) => {
 
     })
 })
+
+app.post("/api/items/order", async (req, res) => {
+    if (req.body) {
+        console.log('received order in backend', req.body)
+        let order: Order = req.body;
+        if (order) {
+            if (order.stripeToken && order.claimedPrice && order.buyerInfo.firstname && order.buyerInfo.lastname && order.buyerInfo.email && order.buyerInfo.address1 && order.buyerInfo.state && order.buyerInfo.zip) {
+                let availableQuants = await getAvailableQuantities(order.cartItems)
+                console.log('availableQuants', availableQuants)
+                if(isSufficientInventory(availableQuants)) {
+                    let price = await calcPrice(order.cartItems);
+                   await updateQuantities(order.cartItems);
+                    try {
+                        const payment = await stripe.paymentIntents.create({
+                          amount: price * 100,
+                          currency: "USD",
+                          description: `${order.buyerInfo.firstname} ${order.buyerInfo.lastname} ${order.buyerInfo.email}`,
+                          payment_method: order.stripeToken,
+                          confirm: true,
+                        });
+                        console.log(`payment ${payment}`);
+                        res.status(200)
+                        res.json(payment)
+                      } catch (error) {
+                        res.send(error);
+                      }
+                }else {
+                    res.status(200)
+                    res.json(availableQuants)
+                }
+
+            } else {
+                res.status(400)
+            }
+
+        } else {
+            res.status(400)
+        }
+
+    } else {
+        res.status(400)
+    }
+})
+
+const updateQuantities = async (cartItems: CartItem[]) => {
+    cartItems.forEach(async cartItem => {
+        let currentQuantity = (await Size.findOne({where: {itemId: cartItem.id, size: cartItem.size}}))?.quantity as number;
+        let newQuantity = currentQuantity - cartItem.quantity;
+        await Size.update(
+            {quantity: newQuantity},
+            {where: {itemId: cartItem.id, size: cartItem.size}}
+        )
+    })
+}
+
+const calcPrice = async (cartItems: CartItem[]) => {
+    let cartItemIds = cartItems.map(cartItem => cartItem.id);
+    let items = await Item.findAll({where: {id: cartItemIds}})
+    return items.reduce((curr, next) => curr + next.price, 0);
+}
+
+const isSufficientInventory = (availQuants: CartItemAvailableQuantity[]) => {
+    let sufficientInventory = true;
+    availQuants.forEach(availQuant => {
+        if (!availQuant.isQuantInStock) {
+            sufficientInventory = false;
+            return
+        };
+    })
+
+    return sufficientInventory;
+}
+
+const getAvailableQuantities = async (cartItems: CartItem[]) => {
+    let availableQuantities: CartItemAvailableQuantity[] = []
+    let cartItemIds = cartItems.map(cartItem => cartItem.id);
+    let cartItemSizes = cartItems.map(cartItem => cartItem.size);
+    let foundItems = await Size.findAll({ where: { itemId: cartItemIds, size: cartItemSizes } })
+    console.log('foundItems', foundItems)
+    if (foundItems.length > 0) {
+        foundItems.forEach(foundItem => {
+            let foundItemId = foundItem.getDataValue('itemId')
+            let foundItemSize = foundItem.getDataValue('size');
+            let cartItemQuantity = cartItems.find((cartItem => cartItem.id === foundItemId && cartItem.size === foundItemSize))?.quantity as number
+            availableQuantities.push({
+                id: foundItemId,
+                size: foundItemSize,
+                availableQuantity: foundItem.getDataValue('quantity'),
+                isQuantInStock: foundItem.getDataValue('quantity') >=  cartItemQuantity? true : false
+            })
+        })
+
+    }
+    return availableQuantities;
+
+}
 
 app.post("/api/items/add", checkJwt, (req, res) => {
     if (req.body) {
