@@ -5,7 +5,9 @@ import { Size } from "./models/Size"
 import { sequelize } from "./db_config/sequelize"
 import * as dotenv from "dotenv";
 import { NewItem, Order, CartItem, CartItemAvailableQuantity } from "./types";
+import { CurrencyCodes } from "validator/lib/isISO4217";
 dotenv.config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const app = express();
 const PORT = process.env.PORT || 3001;
 app.use(express.urlencoded({ extended: true }));
@@ -90,10 +92,24 @@ app.post("/api/items/order", async (req, res) => {
                 let availableQuants = await getAvailableQuantities(order.cartItems)
                 console.log('availableQuants', availableQuants)
                 if(isSufficientInventory(availableQuants)) {
-                    res.status(200)
-                    res.send('request quantities are in stock')
+                    let price = await calcPrice(order.cartItems);
+                   await updateQuantities(order.cartItems);
+                    try {
+                        const payment = await stripe.paymentIntents.create({
+                          amount: price * 100,
+                          currency: "USD",
+                          description: `${order.buyerInfo.firstname} ${order.buyerInfo.lastname} ${order.buyerInfo.email}`,
+                          payment_method: order.stripeToken,
+                          confirm: true,
+                        });
+                        console.log(`payment ${payment}`);
+                        res.status(200)
+                        res.json(payment)
+                      } catch (error) {
+                        res.send(error);
+                      }
                 }else {
-                    res.status(404)
+                    res.status(200)
                     res.json(availableQuants)
                 }
 
@@ -109,6 +125,23 @@ app.post("/api/items/order", async (req, res) => {
         res.status(400)
     }
 })
+
+const updateQuantities = async (cartItems: CartItem[]) => {
+    cartItems.forEach(async cartItem => {
+        let currentQuantity = (await Size.findOne({where: {itemId: cartItem.id, size: cartItem.size}}))?.quantity as number;
+        let newQuantity = currentQuantity - cartItem.quantity;
+        await Size.update(
+            {quantity: newQuantity},
+            {where: {itemId: cartItem.id, size: cartItem.size}}
+        )
+    })
+}
+
+const calcPrice = async (cartItems: CartItem[]) => {
+    let cartItemIds = cartItems.map(cartItem => cartItem.id);
+    let items = await Item.findAll({where: {id: cartItemIds}})
+    return items.reduce((curr, next) => curr + next.price, 0);
+}
 
 const isSufficientInventory = (availQuants: CartItemAvailableQuantity[]) => {
     let sufficientInventory = true;

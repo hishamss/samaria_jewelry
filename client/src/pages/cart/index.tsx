@@ -121,8 +121,8 @@ const CartChild = () => {
                 </Table>)
             }
         </div>
-        <div className="cart-subtotal mb-5">Subtotal: ${currentSubtotal}</div>
-        <div className="cart-checkout mb-5 d-flex align-items-center flex-column">
+        {cartItems.length>0 ?  <div className="cart-subtotal mb-5">Subtotal: ${currentSubtotal}</div>:null}
+       {cartItems.length>0 ? <div className="cart-checkout mb-5 d-flex align-items-center flex-column">
             <Formik
                 initialValues={checkoutFromInitialValues}
                 validationSchema={FormikValidationSchema}
@@ -172,9 +172,25 @@ const CartChild = () => {
                         cardElement?.clear();
                         // console.log('order', order);
                         processPayment(order).then(result => {
-                            console.log("processPayment", result);
+                            
+                            console.log("result", result)
+                            if(result.status === 200) {
+                                if(result.data) {
+                                    if (result.data.status === 'succeeded') {
+                                        
+                                        alert(`Payment of $${(result.data.amount)/100} submitted successfully`)
+                                        setCartItems([])
+                                        localStorage.removeItem("samaria-cart");
+                                        dispatch(UpdateCartCount(0));
+                                        setSubmitting(false);
+
+                                    }
+                                }
+                            }
+                            
+                            
                         })
-                        setSubmitting(false);
+                        
                     }
                     
                     
@@ -312,7 +328,7 @@ const CartChild = () => {
                         </Form.Group>
 
                         <button disabled={isSubmitting || cartItems.length === 0} className="w-50 mt-3" id='go-payment' type='submit'>
-                            Continue to payment</button>
+                            Make a Payment</button>
                             {isSubmitting ?   <div><img src="images/loading.gif" alt="loading" width={100} height={100}/></div> : null}
                            
                           
@@ -320,7 +336,7 @@ const CartChild = () => {
                 )}
             </Formik>
 
-        </div>
+        </div>:null}
 
     </div>
 }
