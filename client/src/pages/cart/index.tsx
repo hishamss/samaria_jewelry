@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table, Form } from "react-bootstrap"
+import { Table, Form, Modal } from "react-bootstrap"
 import { CartItem, CheckoutFormValues, Order } from "../../types";
 import { useDispatch } from "react-redux";
 import { UpdateCartCount } from "../../redux/action-creators"
@@ -8,6 +8,7 @@ import * as yup from 'yup'
 import { Elements, CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { processPayment, sendConfirmationEmail } from "../../utils/api";
+
 import "./index.css";
 
 
@@ -16,6 +17,8 @@ const CartChild = () => {
     const stripe = useStripe();
     const elements = useElements();
     const [formikSubmitting, setFormikSubmitting] = useState(false);
+    const [showConfirmationModal, setShowConfirmationModal] = useState(false)
+    const [confirmationModalBodyContent, setConfirmationModalBodyContent] = useState('');
     const checkoutFromInitialValues: CheckoutFormValues = {
         firstName: '',
         lastName: '',
@@ -181,7 +184,9 @@ const CartChild = () => {
                                     if (result.data.status === 'succeeded') {
                                         // setSubmitting(false);
                                         setFormikSubmitting(false)
-                                        alert(`Payment of $${(result.data.amount)/100} submitted successfully`)
+                                        setConfirmationModalBodyContent('')
+                                        setShowConfirmationModal(true)
+                                        setConfirmationModalBodyContent(`Payment of $${(result.data.amount)/100} submitted successfully`)
                                         setCartItems([])
                                         localStorage.removeItem("samaria-cart");
                                         dispatch(UpdateCartCount(0));
@@ -342,7 +347,14 @@ const CartChild = () => {
             </Formik>
 
         </div>:null}
-
+        <Modal show={showConfirmationModal} onHide={() => setShowConfirmationModal(false)}>
+        <Modal.Header closeButton>
+        <Modal.Title className="item-name">Thanks for your purchase</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {confirmationModalBodyContent}
+      </Modal.Body>
+    </Modal>
     </div>
 }
 
