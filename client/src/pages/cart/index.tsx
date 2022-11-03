@@ -7,7 +7,7 @@ import { Formik, Field } from "formik"
 import * as yup from 'yup'
 import { Elements, CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { processPayment } from "../../utils/api";
+import { processPayment, sendConfirmationEmail } from "../../utils/api";
 import "./index.css";
 
 
@@ -177,19 +177,20 @@ const CartChild = () => {
                             if(result.status === 200) {
                                 if(result.data) {
                                     if (result.data.status === 'succeeded') {
-                                        
+                                        setSubmitting(false);
                                         alert(`Payment of $${(result.data.amount)/100} submitted successfully`)
                                         setCartItems([])
                                         localStorage.removeItem("samaria-cart");
                                         dispatch(UpdateCartCount(0));
-                                        setSubmitting(false);
-
+                                        sendConfirmationEmail(order, result.data.id)
+                                        .then(result => console.log(result))
+                                        .catch(err => console.log(err))
                                     }
                                 }
                             }
                             
                             
-                        })
+                        }).catch(err => console.log(err))
                         
                     }
                     

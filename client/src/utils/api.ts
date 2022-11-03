@@ -82,3 +82,21 @@ export const processPayment = async (order: Order): Promise<any> => {
         return {message: e.response.data}
     }
 }
+
+export const sendConfirmationEmail = async (order: Order, paymentId:number): Promise<any> => {
+    try {
+        let postObject = {
+            order: order,
+            paymentId: paymentId
+        }
+        let response = await axios.post("/api/items/sendemail", JSON.stringify(postObject), {
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+        });
+        return response;
+    } catch (e:any) {
+        return {message: e.response.data}
+    }
+}
