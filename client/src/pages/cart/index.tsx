@@ -15,6 +15,7 @@ import "./index.css";
 const CartChild = () => {
     const stripe = useStripe();
     const elements = useElements();
+    const [formikSubmitting, setFormikSubmitting] = useState(false);
     const checkoutFromInitialValues: CheckoutFormValues = {
         firstName: '',
         lastName: '',
@@ -126,9 +127,10 @@ const CartChild = () => {
             <Formik
                 initialValues={checkoutFromInitialValues}
                 validationSchema={FormikValidationSchema}
-                onSubmit={async (values, { setSubmitting }) => {
+                onSubmit={async values => {
                     setIsStripeInvalid(false);
-                    setSubmitting(true)
+                    // setSubmitting(true)
+                    setFormikSubmitting(true)
                     
                     if (stripe && elements) {
                         const cardElement = elements.getElement(CardElement);
@@ -140,7 +142,7 @@ const CartChild = () => {
                             card: cardElement,
                         });
                         if (error) {
-                            setSubmitting(false);
+                            // setSubmitting(false);
                             setIsStripeInvalid(true);
                             return 
                         }
@@ -177,7 +179,8 @@ const CartChild = () => {
                             if(result.status === 200) {
                                 if(result.data) {
                                     if (result.data.status === 'succeeded') {
-                                        setSubmitting(false);
+                                        // setSubmitting(false);
+                                        setFormikSubmitting(false)
                                         alert(`Payment of $${(result.data.amount)/100} submitted successfully`)
                                         setCartItems([])
                                         localStorage.removeItem("samaria-cart");
@@ -328,9 +331,10 @@ const CartChild = () => {
                                 {isStripeInvalid ? <div className="text-start formik_err_msg">Invalid Card Information</div> : null}
                         </Form.Group>
 
-                        <button disabled={isSubmitting || cartItems.length === 0} className="w-50 mt-3" id='go-payment' type='submit'>
-                            Make a Payment</button>
-                            {isSubmitting ?   <div><img src="images/loading.gif" alt="loading" width={100} height={100}/></div> : null}
+                        
+                            {formikSubmitting ?   <div><img src="images/loading.gif" alt="loading" width={100} height={100}/></div> : <button className="w-50 mt-3" id='go-payment' type='submit'>
+                            Make a Payment</button>}
+                            {}
                            
                           
                     </Form>
