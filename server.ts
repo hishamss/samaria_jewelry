@@ -5,8 +5,17 @@ import { Size } from "./models/Size"
 import { sequelize } from "./db_config/sequelize"
 import * as dotenv from "dotenv";
 import { NewItem, Order, CartItem, CartItemAvailableQuantity } from "./types";
-import { CurrencyCodes } from "validator/lib/isISO4217";
+let nodemailer = require('nodemailer');
+let smtpTransport = require('nodemailer-smtp-transport');
 dotenv.config();
+var transporter = nodemailer.createTransport(smtpTransport({
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    auth: {
+      user: 'samaria.jewelery@gmail.com',
+      pass: `${process.env.GMAIL_APP_PASSWORD}`
+    }
+  }));
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -85,15 +94,13 @@ app.post("/api/items/s3-upload", checkJwt, (req, res) => {
 
 app.post("/api/items/order", async (req, res) => {
     if (req.body) {
-        console.log('received order in backend', req.body)
         let order: Order = req.body;
         if (order) {
             if (order.stripeToken && order.claimedPrice && order.buyerInfo.firstname && order.buyerInfo.lastname && order.buyerInfo.email && order.buyerInfo.address1 && order.buyerInfo.state && order.buyerInfo.zip) {
                 let availableQuants = await getAvailableQuantities(order.cartItems)
-                console.log('availableQuants', availableQuants)
                 if(isSufficientInventory(availableQuants)) {
                     let price = await calcPrice(order.cartItems);
-                   await updateQuantities(order.cartItems);
+                    await updateQuantities(order.cartItems);
                     try {
                         const payment = await stripe.paymentIntents.create({
                           amount: price * 100,
@@ -102,7 +109,6 @@ app.post("/api/items/order", async (req, res) => {
                           payment_method: order.stripeToken,
                           confirm: true,
                         });
-                        console.log(`payment ${payment}`);
                         res.status(200)
                         res.json(payment)
                       } catch (error) {
@@ -126,6 +132,48 @@ app.post("/api/items/order", async (req, res) => {
     }
 })
 
+app.post("/api/items/sendemail", async (req, res) => {
+    if(req.body) {
+        let order:Order = req.body.order
+        let paymentId = req.body.paymentId;
+        let price = await calcPrice(order.cartItems)
+        let itemsHtml = ""
+        order.cartItems.forEach(item => {
+            itemsHtml += `<ul><li>${item.name}<ul><li>Quantity: ${item.quantity}</li><li>Price: $${item.price}</li><li>Size: ${item.size === 'all' ? 'NA' : item.size}</li></ul></li></ul>`
+        })
+    let mailOptions = {
+        from: 'samaria.jewelery@gmail.com',
+        to: `${order.buyerInfo.email}`,
+        subject: `Smaria Jewlery: order confirmed`,
+        html: `
+        <h2>Ordered from:</h2>
+        <p> Samaria Jewelery</p>
+        <h2>Order id:</h2>
+        <p> ${paymentId}</p>
+        <h2>Total cost:</h2>
+        <p> $${price}</p>
+        <h2>Items</h2>
+        <ul>
+        ${itemsHtml}
+        </ul>
+        <h2>Shipping Address:</h2>
+        <p> ${order.buyerInfo.address1} ${order.buyerInfo.address2}</p>
+        <p> ${order.buyerInfo.state} ${order.buyerInfo.zip} US </p>
+        `
+      };
+    
+      transporter.sendMail(mailOptions, (error: any, info: { response: string; }) => {
+        if (error) {
+          console.log('sending email error: ', error);
+          res.status(500).send(error)
+        } else {
+          res.status(200).send('email sent sucessfully')
+        }
+      });
+    }
+    
+})
+
 const updateQuantities = async (cartItems: CartItem[]) => {
     cartItems.forEach(async cartItem => {
         let currentQuantity = (await Size.findOne({where: {itemId: cartItem.id, size: cartItem.size}}))?.quantity as number;
@@ -138,9 +186,20 @@ const updateQuantities = async (cartItems: CartItem[]) => {
 }
 
 const calcPrice = async (cartItems: CartItem[]) => {
-    let cartItemIds = cartItems.map(cartItem => cartItem.id);
+    interface IdToQuantity {
+        [id:number]: number;
+    }
+    let quantityForEachId: IdToQuantity = {};
+
+    let cartItemIds = cartItems.map(cartItem => {
+        if(cartItem.id in quantityForEachId) {
+            quantityForEachId[cartItem.id] = quantityForEachId[cartItem.id] + cartItem.quantity
+        }else quantityForEachId[cartItem.id] = cartItem.quantity;
+       return cartItem.id
+        
+    });
     let items = await Item.findAll({where: {id: cartItemIds}})
-    return items.reduce((curr, next) => curr + next.price, 0);
+    return items.reduce((curr, next) => curr + next.price * quantityForEachId[next.id], 0);
 }
 
 const isSufficientInventory = (availQuants: CartItemAvailableQuantity[]) => {
@@ -160,7 +219,6 @@ const getAvailableQuantities = async (cartItems: CartItem[]) => {
     let cartItemIds = cartItems.map(cartItem => cartItem.id);
     let cartItemSizes = cartItems.map(cartItem => cartItem.size);
     let foundItems = await Size.findAll({ where: { itemId: cartItemIds, size: cartItemSizes } })
-    console.log('foundItems', foundItems)
     if (foundItems.length > 0) {
         foundItems.forEach(foundItem => {
             let foundItemId = foundItem.getDataValue('itemId')
@@ -295,7 +353,6 @@ if (process.env.NODE_ENV === 'production') {
     await sequelize.sync();
     app.listen(PORT, () => console.log(`Listning on port ${PORT}`));
 })();
-
 
 
 
