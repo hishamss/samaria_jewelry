@@ -3,6 +3,7 @@ import path from "path";
 import { Item } from "./models/Item"
 import { Size } from "./models/Size"
 import { sequelize } from "./db_config/sequelize"
+import {Op} from 'sequelize'
 import * as dotenv from "dotenv";
 import { NewItem, Order, CartItem, CartItemAvailableQuantity } from "./types";
 let nodemailer = require('nodemailer');
@@ -95,9 +96,12 @@ app.post("/api/items/s3-upload", checkJwt, (req, res) => {
 app.post("/api/items/order", async (req, res) => {
     if (req.body) {
         let order: Order = req.body;
+        console.log('order', order)
         if (order) {
             if (order.stripeToken && order.claimedPrice && order.buyerInfo.firstname && order.buyerInfo.lastname && order.buyerInfo.email && order.buyerInfo.address1 && order.buyerInfo.state && order.buyerInfo.zip) {
                 let availableQuants = await getAvailableQuantities(order.cartItems)
+                console.log('availableQuants', availableQuants)
+                console.log('isSufficentInventroy', isSufficientInventory(availableQuants))
                 if(isSufficientInventory(availableQuants)) {
                     let price = await calcPrice(order.cartItems);
                     await updateQuantities(order.cartItems);
@@ -109,26 +113,32 @@ app.post("/api/items/order", async (req, res) => {
                           payment_method: order.stripeToken,
                           confirm: true,
                         });
-                        res.status(200)
-                        res.json(payment)
+                        res.status(200).json(
+                            {paymentInfo: {
+                                id: payment.id,
+                                amount: payment.amount,
+                                status: payment.status
+                            }}
+                        )
                       } catch (error) {
-                        res.send(error);
+                        res.status(500).send(error);
                       }
                 }else {
-                    res.status(200)
-                    res.json(availableQuants)
+                    res.status(200).json(
+                        {availableQuants: availableQuants}
+                    )
                 }
 
             } else {
-                res.status(400)
+                res.status(400).send('missing data in order object')
             }
 
         } else {
-            res.status(400)
+            res.status(400).send('missing order object in the request body')
         }
 
     } else {
-        res.status(400)
+        res.status(400).send("missing request body")
     }
 })
 
@@ -170,19 +180,21 @@ app.post("/api/items/sendemail", async (req, res) => {
           res.status(200).send('email sent sucessfully')
         }
       });
+    }else {
+        res.status(400).send('missing request body')
     }
     
 })
 
 const updateQuantities = async (cartItems: CartItem[]) => {
-    cartItems.forEach(async cartItem => {
-        let currentQuantity = (await Size.findOne({where: {itemId: cartItem.id, size: cartItem.size}}))?.quantity as number;
+    for(const cartItem of cartItems) {
+        let currentQuantity = (await Size.findOne({ where: {[Op.and]: [{ itemId: cartItem.id}, {size: cartItem.size } ]}  }))?.quantity as number;
         let newQuantity = currentQuantity - cartItem.quantity;
         await Size.update(
             {quantity: newQuantity},
             {where: {itemId: cartItem.id, size: cartItem.size}}
         )
-    })
+    }
 }
 
 const calcPrice = async (cartItems: CartItem[]) => {
@@ -216,9 +228,17 @@ const isSufficientInventory = (availQuants: CartItemAvailableQuantity[]) => {
 
 const getAvailableQuantities = async (cartItems: CartItem[]) => {
     let availableQuantities: CartItemAvailableQuantity[] = []
-    let cartItemIds = cartItems.map(cartItem => cartItem.id);
-    let cartItemSizes = cartItems.map(cartItem => cartItem.size);
-    let foundItems = await Size.findAll({ where: { itemId: cartItemIds, size: cartItemSizes } })
+    // let cartItemIds = cartItems.map(cartItem => cartItem.id);
+    // console.log("cartItemsIds", cartItemIds)
+    // let cartItemSizes = cartItems.map(cartItem => cartItem.size);
+    // console.log("cartItemSizes", cartItemSizes)
+    let foundItems:Size[] = []
+    for(const cartItem of cartItems) {
+        let foundItem = await Size.findOne({ where: {[Op.and]: [{ itemId: cartItem.id}, {size: cartItem.size } ]}  });
+        if(foundItem) foundItems.push(foundItem)
+    }
+
+    console.log("foundItems", foundItems)
     if (foundItems.length > 0) {
         foundItems.forEach(foundItem => {
             let foundItemId = foundItem.getDataValue('itemId')

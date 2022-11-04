@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table, Form } from "react-bootstrap"
+import { Table, Form, Modal } from "react-bootstrap"
 import { CartItem, CheckoutFormValues, Order } from "../../types";
 import { useDispatch } from "react-redux";
 import { UpdateCartCount } from "../../redux/action-creators"
@@ -8,6 +8,7 @@ import * as yup from 'yup'
 import { Elements, CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { processPayment, sendConfirmationEmail } from "../../utils/api";
+
 import "./index.css";
 
 
@@ -15,6 +16,11 @@ import "./index.css";
 const CartChild = () => {
     const stripe = useStripe();
     const elements = useElements();
+    const [formikSubmitting, setFormikSubmitting] = useState(false);
+    const [showConfirmationModal, setShowConfirmationModal] = useState(false)
+    const [confirmationModalBodyContent, setConfirmationModalBodyContent] = useState('');
+    const [itemsWithShortQuantities, setItemsWithShortQuantities] = useState<CartItem[]>([])
+    const [availableQuantities, setAvailableQuantities] = useState<{id:number, size:string, availableQuantity:number, isQuantInStock: boolean}[]>([])
     const checkoutFromInitialValues: CheckoutFormValues = {
         firstName: '',
         lastName: '',
@@ -42,6 +48,7 @@ const CartChild = () => {
     }
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [isStripeInvalid, setIsStripeInvalid] = useState(false);
+    const [paymentStatus, setPaymentStatus] = useState('');
     let currentSubtotal = 0;
     const dispatch = useDispatch();
     useEffect(() => {
@@ -75,6 +82,32 @@ const CartChild = () => {
         localStorage.setItem("samaria-cart", JSON.stringify(currentCart));
         setCartItems(currentCart);
 
+    }
+
+    const handleClosePaymentModal = () => {
+        setPaymentStatus('')
+      setShowConfirmationModal(false)
+      setFormikSubmitting(false)
+    }
+
+    const updateCartQuantities = () => {
+        let cartItemsHolder = [...cartItems];
+        console.log('cartItemsHolderbefore', cartItemsHolder)
+        cartItems.forEach((cartItem,index)=> {
+            let inStockQuantity = availableQuantities.find(i => i.id === cartItem.id && i.size === cartItem.size && !i.isQuantInStock)?.availableQuantity as number;
+            console.log('inStockQuantity', inStockQuantity)
+           if(inStockQuantity) {cartItemsHolder[index].quantity = inStockQuantity;console.log('update quant');}
+           if(inStockQuantity === 0) {
+            let indexToRemove = cartItemsHolder.findIndex(cartItemHolder => cartItemHolder.id === cartItem.id && cartItemHolder.size === cartItem.size);
+            cartItemsHolder.splice(indexToRemove, 1); console.log('splice')}
+        })
+        console.log('cartItemsHolderAfter', cartItemsHolder)
+        localStorage.setItem("samaria-cart", JSON.stringify(cartItemsHolder));
+        setCartItems(cartItemsHolder);
+        dispatch(UpdateCartCount(cartItemsHolder.length));
+        setPaymentStatus('')
+        setShowConfirmationModal(false)
+        setFormikSubmitting(false)
     }
     return <div className="container cart-cont">
         <div className="cart-header mb-5">My Shopping Cart</div>
@@ -126,9 +159,9 @@ const CartChild = () => {
             <Formik
                 initialValues={checkoutFromInitialValues}
                 validationSchema={FormikValidationSchema}
-                onSubmit={async (values, { setSubmitting }) => {
+                onSubmit={async values => {
                     setIsStripeInvalid(false);
-                    setSubmitting(true)
+
                     
                     if (stripe && elements) {
                         const cardElement = elements.getElement(CardElement);
@@ -140,7 +173,7 @@ const CartChild = () => {
                             card: cardElement,
                         });
                         if (error) {
-                            setSubmitting(false);
+                            // setSubmitting(false);
                             setIsStripeInvalid(true);
                             return 
                         }
@@ -170,22 +203,40 @@ const CartChild = () => {
                             stripeToken: paymentMethod?.id
                         } 
                         cardElement?.clear();
-                        // console.log('order', order);
-                        processPayment(order).then(result => {
+                        setFormikSubmitting(true)
+                        processPayment(order).then(({data, status}) => {
                             
-                            console.log("result", result)
-                            if(result.status === 200) {
-                                if(result.data) {
-                                    if (result.data.status === 'succeeded') {
-                                        setSubmitting(false);
-                                        alert(`Payment of $${(result.data.amount)/100} submitted successfully`)
+                            console.log("result", data)
+                            if(status === 200) {
+                                setPaymentStatus('')
+                                if(data.paymentInfo) {
+                                    if (data.paymentInfo.status === 'succeeded') {
+                                        // setSubmitting(false);
+                                        setFormikSubmitting(false)
+                                        setPaymentStatus("payment submitted")
+                                        setConfirmationModalBodyContent('')
+                                        setShowConfirmationModal(true)
+                                        setConfirmationModalBodyContent(`Payment of $${(data.paymentInfo.amount)/100} submitted successfully`)
                                         setCartItems([])
                                         localStorage.removeItem("samaria-cart");
                                         dispatch(UpdateCartCount(0));
-                                        sendConfirmationEmail(order, result.data.id)
+                                        sendConfirmationEmail(order, data.paymentInfo.id)
                                         .then(result => console.log(result))
                                         .catch(err => console.log(err))
                                     }
+                                }else if(data.availableQuants) {
+                                    setAvailableQuantities(data.availableQuants)
+                                    let cartItemsWithShortQuantities:CartItem[] = []
+                                    cartItems.forEach(cartItem => {
+                                        let matchedItem= data.availableQuants.find((item: { id: number; size: string; }) => item.id === cartItem.id && item.size === cartItem.size);
+                                        if(!(matchedItem.isQuantInStock)) cartItemsWithShortQuantities.push(cartItem)
+                                    })
+                                    console.log('cartItems ', cartItems)
+                                    console.log('availableQuants', data.availableQuants)
+                                    console.log('cartItemsWithShortQuantities', cartItemsWithShortQuantities)
+                                    setItemsWithShortQuantities(cartItemsWithShortQuantities)
+                                    setPaymentStatus('short in qunatity');
+                                    setShowConfirmationModal(true)
                                 }
                             }
                             
@@ -328,9 +379,10 @@ const CartChild = () => {
                                 {isStripeInvalid ? <div className="text-start formik_err_msg">Invalid Card Information</div> : null}
                         </Form.Group>
 
-                        <button disabled={isSubmitting || cartItems.length === 0} className="w-50 mt-3" id='go-payment' type='submit'>
-                            Make a Payment</button>
-                            {isSubmitting ?   <div><img src="images/loading.gif" alt="loading" width={100} height={100}/></div> : null}
+                        
+                            {formikSubmitting ?   <div><img src="images/loading.gif" alt="loading" width={100} height={100}/></div> : <button className="w-50 mt-3" id='go-payment' type='submit'>
+                            Make a Payment</button>}
+                            {}
                            
                           
                     </Form>
@@ -338,7 +390,51 @@ const CartChild = () => {
             </Formik>
 
         </div>:null}
+        <Modal id="paymentConfirmationModal" show={showConfirmationModal} onHide={handleClosePaymentModal}>
+        <Modal.Header closeButton>
+        <Modal.Title className="item-name">
+        {paymentStatus === 'payment submitted'? 'Thanks for your purchase':null }
+        {paymentStatus === 'short in qunatity'? 'Sorry, we are short in quantities':null }
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {paymentStatus === 'payment submitted' ?confirmationModalBodyContent: null}
+        {paymentStatus === 'short in qunatity'? (<><Table responsive className="cart-table p-5">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Size</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {
+                            itemsWithShortQuantities.map((item, index) => {
+                                let availableQ = availableQuantities.find(i=> i.id === item.id && i.size === item.size)?.availableQuantity as number
+                                return (<tr key={index}>
+                                    <td className="cart-table-first">
+                                        <img className="cart-image" loading="lazy"
+                                            decoding="async" src={`https://samaria-item-images.s3.us-east-2.amazonaws.com/${(item.name).replace(/ /g, "+")}/main.jpg`} alt={item.name} />
+                                        <p className="cart-table-items">{item.name}</p>
+                                    </td>
+                                    <td className="cart-table-other"><p className="cart-table-items">{item.size}</p></td>
+                                    <td className="cart-table-other">
+                                        <p className="cart-table-items">
+                                            {item.quantity} <span style={{color:'red'}}>{availableQ > 0 ? `(only ${availableQ} in stock)`: '(out of stock)' } </span>
+                                        </p>
+                                    </td>
+                                    <td className="cart-table-other"><p className="cart-table-items">${(item.price) * (item.quantity)}</p></td>
 
+                                </tr>)
+                            }
+                            )}
+                    </tbody>
+                </Table> <button className="mt-3" id='updateCartQuantities' onClick={() => updateCartQuantities()}>
+                            Update Quantities</button></>) :null}
+      </Modal.Body>
+     
+    </Modal>
     </div>
 }
 
