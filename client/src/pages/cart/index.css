@@ -118,6 +118,20 @@
     background: #81D8D0;
 }
 
+#updateCartQuantities {
+    background: #3A3E40;
+    font-family: 'Lustria', serif;
+    color: white;
+    font-size: 20px;
+    padding:0 20px;
+    border-radius: 5px;
+    border: 0;
+}
+
+#updateCartQuantities:hover {
+    background: #81D8D0;
+}
+
 #go-payment:disabled,
 #go-payment[disabled]{
  opacity: 0.2;
@@ -129,4 +143,9 @@
     height: 38px;
     padding: 0.375rem 0.75rem;
     line-height: 1.5;
+}
+
+#paymentConfirmationModal {
+    width: 70% !important;
+    max-width: none !important;
 }

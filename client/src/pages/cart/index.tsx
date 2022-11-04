@@ -19,6 +19,8 @@ const CartChild = () => {
     const [formikSubmitting, setFormikSubmitting] = useState(false);
     const [showConfirmationModal, setShowConfirmationModal] = useState(false)
     const [confirmationModalBodyContent, setConfirmationModalBodyContent] = useState('');
+    const [itemsWithShortQuantities, setItemsWithShortQuantities] = useState<CartItem[]>([])
+    const [availableQuantities, setAvailableQuantities] = useState<{id:number, size:string, availableQuantity:number, isQuantInStock: boolean}[]>([])
     const checkoutFromInitialValues: CheckoutFormValues = {
         firstName: '',
         lastName: '',
@@ -46,6 +48,7 @@ const CartChild = () => {
     }
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [isStripeInvalid, setIsStripeInvalid] = useState(false);
+    const [paymentStatus, setPaymentStatus] = useState('');
     let currentSubtotal = 0;
     const dispatch = useDispatch();
     useEffect(() => {
@@ -79,6 +82,32 @@ const CartChild = () => {
         localStorage.setItem("samaria-cart", JSON.stringify(currentCart));
         setCartItems(currentCart);
 
+    }
+
+    const handleClosePaymentModal = () => {
+        setPaymentStatus('')
+      setShowConfirmationModal(false)
+      setFormikSubmitting(false)
+    }
+
+    const updateCartQuantities = () => {
+        let cartItemsHolder = [...cartItems];
+        console.log('cartItemsHolderbefore', cartItemsHolder)
+        cartItems.forEach((cartItem,index)=> {
+            let inStockQuantity = availableQuantities.find(i => i.id === cartItem.id && i.size === cartItem.size && !i.isQuantInStock)?.availableQuantity as number;
+            console.log('inStockQuantity', inStockQuantity)
+           if(inStockQuantity) {cartItemsHolder[index].quantity = inStockQuantity;console.log('update quant');}
+           if(inStockQuantity === 0) {
+            let indexToRemove = cartItemsHolder.findIndex(cartItemHolder => cartItemHolder.id === cartItem.id && cartItemHolder.size === cartItem.size);
+            cartItemsHolder.splice(indexToRemove, 1); console.log('splice')}
+        })
+        console.log('cartItemsHolderAfter', cartItemsHolder)
+        localStorage.setItem("samaria-cart", JSON.stringify(cartItemsHolder));
+        setCartItems(cartItemsHolder);
+        dispatch(UpdateCartCount(cartItemsHolder.length));
+        setPaymentStatus('')
+        setShowConfirmationModal(false)
+        setFormikSubmitting(false)
     }
     return <div className="container cart-cont">
         <div className="cart-header mb-5">My Shopping Cart</div>
@@ -132,8 +161,7 @@ const CartChild = () => {
                 validationSchema={FormikValidationSchema}
                 onSubmit={async values => {
                     setIsStripeInvalid(false);
-                    // setSubmitting(true)
-                    setFormikSubmitting(true)
+
                     
                     if (stripe && elements) {
                         const cardElement = elements.getElement(CardElement);
@@ -175,25 +203,40 @@ const CartChild = () => {
                             stripeToken: paymentMethod?.id
                         } 
                         cardElement?.clear();
-                        // console.log('order', order);
-                        processPayment(order).then(result => {
+                        setFormikSubmitting(true)
+                        processPayment(order).then(({data, status}) => {
                             
-                            console.log("result", result)
-                            if(result.status === 200) {
-                                if(result.data) {
-                                    if (result.data.status === 'succeeded') {
+                            console.log("result", data)
+                            if(status === 200) {
+                                setPaymentStatus('')
+                                if(data.paymentInfo) {
+                                    if (data.paymentInfo.status === 'succeeded') {
                                         // setSubmitting(false);
                                         setFormikSubmitting(false)
+                                        setPaymentStatus("payment submitted")
                                         setConfirmationModalBodyContent('')
                                         setShowConfirmationModal(true)
-                                        setConfirmationModalBodyContent(`Payment of $${(result.data.amount)/100} submitted successfully`)
+                                        setConfirmationModalBodyContent(`Payment of $${(data.paymentInfo.amount)/100} submitted successfully`)
                                         setCartItems([])
                                         localStorage.removeItem("samaria-cart");
                                         dispatch(UpdateCartCount(0));
-                                        sendConfirmationEmail(order, result.data.id)
+                                        sendConfirmationEmail(order, data.paymentInfo.id)
                                         .then(result => console.log(result))
                                         .catch(err => console.log(err))
                                     }
+                                }else if(data.availableQuants) {
+                                    setAvailableQuantities(data.availableQuants)
+                                    let cartItemsWithShortQuantities:CartItem[] = []
+                                    cartItems.forEach(cartItem => {
+                                        let matchedItem= data.availableQuants.find((item: { id: number; size: string; }) => item.id === cartItem.id && item.size === cartItem.size);
+                                        if(!(matchedItem.isQuantInStock)) cartItemsWithShortQuantities.push(cartItem)
+                                    })
+                                    console.log('cartItems ', cartItems)
+                                    console.log('availableQuants', data.availableQuants)
+                                    console.log('cartItemsWithShortQuantities', cartItemsWithShortQuantities)
+                                    setItemsWithShortQuantities(cartItemsWithShortQuantities)
+                                    setPaymentStatus('short in qunatity');
+                                    setShowConfirmationModal(true)
                                 }
                             }
                             
@@ -347,13 +390,50 @@ const CartChild = () => {
             </Formik>
 
         </div>:null}
-        <Modal show={showConfirmationModal} onHide={() => setShowConfirmationModal(false)}>
+        <Modal id="paymentConfirmationModal" show={showConfirmationModal} onHide={handleClosePaymentModal}>
         <Modal.Header closeButton>
-        <Modal.Title className="item-name">Thanks for your purchase</Modal.Title>
+        <Modal.Title className="item-name">
+        {paymentStatus === 'payment submitted'? 'Thanks for your purchase':null }
+        {paymentStatus === 'short in qunatity'? 'Sorry, we are short in quantities':null }
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {confirmationModalBodyContent}
+        {paymentStatus === 'payment submitted' ?confirmationModalBodyContent: null}
+        {paymentStatus === 'short in qunatity'? (<><Table responsive className="cart-table p-5">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Size</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {
+                            itemsWithShortQuantities.map((item, index) => {
+                                let availableQ = availableQuantities.find(i=> i.id === item.id && i.size === item.size)?.availableQuantity as number
+                                return (<tr key={index}>
+                                    <td className="cart-table-first">
+                                        <img className="cart-image" loading="lazy"
+                                            decoding="async" src={`https://samaria-item-images.s3.us-east-2.amazonaws.com/${(item.name).replace(/ /g, "+")}/main.jpg`} alt={item.name} />
+                                        <p className="cart-table-items">{item.name}</p>
+                                    </td>
+                                    <td className="cart-table-other"><p className="cart-table-items">{item.size}</p></td>
+                                    <td className="cart-table-other">
+                                        <p className="cart-table-items">
+                                            {item.quantity} <span style={{color:'red'}}>{availableQ > 0 ? `(only ${availableQ} in stock)`: '(out of stock)' } </span>
+                                        </p>
+                                    </td>
+                                    <td className="cart-table-other"><p className="cart-table-items">${(item.price) * (item.quantity)}</p></td>
+
+                                </tr>)
+                            }
+                            )}
+                    </tbody>
+                </Table> <button className="mt-3" id='updateCartQuantities' onClick={() => updateCartQuantities()}>
+                            Update Quantities</button></>) :null}
       </Modal.Body>
+     
     </Modal>
     </div>
 }
