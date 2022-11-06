@@ -21,6 +21,7 @@ const CartChild = () => {
     const [confirmationModalBodyContent, setConfirmationModalBodyContent] = useState('');
     const [itemsWithShortQuantities, setItemsWithShortQuantities] = useState<CartItem[]>([])
     const [availableQuantities, setAvailableQuantities] = useState<{id:number, size:string, availableQuantity:number, isQuantInStock: boolean}[]>([])
+    const [unAvailableItems, setUnAvailableItems] = useState<CartItem[]>([])
     const checkoutFromInitialValues: CheckoutFormValues = {
         firstName: '',
         lastName: '',
@@ -109,6 +110,19 @@ const CartChild = () => {
         setShowConfirmationModal(false)
         setFormikSubmitting(false)
     }
+
+    const removeUnavailableItemsFromCart = () => {
+        let cartItemsHolder = cartItems.filter(cartItem => {
+            return !unAvailableItems.find(i => i.id === cartItem.id && i.size === cartItem.size);
+        })
+        console.log("new cart Items", cartItemsHolder)
+        localStorage.setItem("samaria-cart", JSON.stringify(cartItemsHolder));
+        setCartItems(cartItemsHolder);
+        dispatch(UpdateCartCount(cartItemsHolder.length));
+        setPaymentStatus('')
+        setShowConfirmationModal(false)
+        setFormikSubmitting(false)
+    }
     return <div className="container cart-cont">
         <div className="cart-header mb-5">My Shopping Cart</div>
         <div className="cart-body mb-5">
@@ -165,7 +179,11 @@ const CartChild = () => {
                     
                     if (stripe && elements) {
                         const cardElement = elements.getElement(CardElement);
-                        if (!cardElement) return
+                        if (!cardElement) {
+                            alert("error in loading payment gateway!, try again")
+                            return
+
+                        }
                         
                         // Use your card Element with other Stripe.js APIs
                         const { error, paymentMethod } = await stripe.createPaymentMethod({
@@ -173,8 +191,8 @@ const CartChild = () => {
                             card: cardElement,
                         });
                         if (error) {
-                            // setSubmitting(false);
                             setIsStripeInvalid(true);
+                            alert("error in loading payment gateway!, try again")
                             return 
                         }
 
@@ -204,14 +222,12 @@ const CartChild = () => {
                         } 
                         cardElement?.clear();
                         setFormikSubmitting(true)
-                        processPayment(order).then(({data, status}) => {
-                            
-                            console.log("result", data)
+                        processPayment(order).then(({status,data}) => {                           
+                            console.log("status, data ", status, data)
                             if(status === 200) {
                                 setPaymentStatus('')
                                 if(data.paymentInfo) {
                                     if (data.paymentInfo.status === 'succeeded') {
-                                        // setSubmitting(false);
                                         setFormikSubmitting(false)
                                         setPaymentStatus("payment submitted")
                                         setConfirmationModalBodyContent('')
@@ -231,17 +247,22 @@ const CartChild = () => {
                                         let matchedItem= data.availableQuants.find((item: { id: number; size: string; }) => item.id === cartItem.id && item.size === cartItem.size);
                                         if(!(matchedItem.isQuantInStock)) cartItemsWithShortQuantities.push(cartItem)
                                     })
-                                    console.log('cartItems ', cartItems)
-                                    console.log('availableQuants', data.availableQuants)
-                                    console.log('cartItemsWithShortQuantities', cartItemsWithShortQuantities)
                                     setItemsWithShortQuantities(cartItemsWithShortQuantities)
                                     setPaymentStatus('short in qunatity');
                                     setShowConfirmationModal(true)
                                 }
+                            }else if (status === 404) {
+                                console.log('not avaialble any more', data.unAvailableItems)
+                                setUnAvailableItems(data.unAvailableItems)
+                                setPaymentStatus('unAvailable Items');
+                                setShowConfirmationModal(true)
                             }
                             
                             
-                        }).catch(err => console.log(err))
+                        }).catch(err => {alert('somthing went wrong in proceccing payment, try again');
+                        
+                        console.log('somthing went wrong in proceccing payment ', err)
+                    })
                         
                     }
                     
@@ -395,6 +416,7 @@ const CartChild = () => {
         <Modal.Title className="item-name">
         {paymentStatus === 'payment submitted'? 'Thanks for your purchase':null }
         {paymentStatus === 'short in qunatity'? 'Sorry, we are short in quantities':null }
+        {paymentStatus === 'unAvailable Items'? 'Sorry, items below are unavailable':null }
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -432,6 +454,39 @@ const CartChild = () => {
                     </tbody>
                 </Table> <button className="mt-3" id='updateCartQuantities' onClick={() => updateCartQuantities()}>
                             Update Quantities</button></>) :null}
+
+                            {paymentStatus === 'unAvailable Items'? (<><Table responsive className="cart-table p-5">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Size</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {
+                            unAvailableItems.map((item, index) => {
+                                return (<tr key={index}>
+                                    <td className="cart-table-first">
+                                        <img className="cart-image" loading="lazy"
+                                            decoding="async" src={`https://samaria-item-images.s3.us-east-2.amazonaws.com/${(item.name).replace(/ /g, "+")}/main.jpg`} alt={item.name} />
+                                        <p className="cart-table-items">{item.name}</p>
+                                    </td>
+                                    <td className="cart-table-other"><p className="cart-table-items">{item.size}</p></td>
+                                    <td className="cart-table-other">
+                                        <p className="cart-table-items">
+                                            {item.quantity}
+                                        </p>
+                                    </td>
+                                    <td className="cart-table-other"><p className="cart-table-items">${(item.price) * (item.quantity)}</p></td>
+
+                                </tr>)
+                            }
+                            )}
+                    </tbody>
+                </Table> <button className="mt-3" id='updateCartQuantities' onClick={() => removeUnavailableItemsFromCart()}>
+                            Remove Unavailable Items</button></>) :null}
       </Modal.Body>
      
     </Modal>
