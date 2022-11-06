@@ -160,7 +160,7 @@ app.post("/api/items/sendemail", async (req, res) => {
         let price = await calcPrice(order.cartItems)
         let itemsHtml = ""
         order.cartItems.forEach(item => {
-            itemsHtml += `<ul><li>${item.name}<ul><li>Quantity: ${item.quantity}</li><li>Price: $${item.price}</li><li>Size: ${item.size === 'all' ? 'NA' : item.size}</li></ul></li></ul>`
+            itemsHtml += `<ul><li>${item.name}<ul><li>Quantity: ${item.quantity}</li><li>Price/Each: $${item.price}</li><li>Size: ${item.size === 'all' ? 'NA' : item.size}</li></ul></li></ul>`
         })
     let mailOptions = {
         from: 'samaria.jewelery@gmail.com',
