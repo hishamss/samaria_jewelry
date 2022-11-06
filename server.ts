@@ -100,34 +100,45 @@ app.post("/api/items/order", async (req, res) => {
         if (order) {
             if (order.stripeToken && order.claimedPrice && order.buyerInfo.firstname && order.buyerInfo.lastname && order.buyerInfo.email && order.buyerInfo.address1 && order.buyerInfo.state && order.buyerInfo.zip) {
                 let availableQuants = await getAvailableQuantities(order.cartItems)
-                console.log('availableQuants', availableQuants)
-                console.log('isSufficentInventroy', isSufficientInventory(availableQuants))
-                if(isSufficientInventory(availableQuants)) {
-                    let price = await calcPrice(order.cartItems);
-                    await updateQuantities(order.cartItems);
-                    try {
-                        const payment = await stripe.paymentIntents.create({
-                          amount: price * 100,
-                          currency: "USD",
-                          description: `${order.buyerInfo.firstname} ${order.buyerInfo.lastname} ${order.buyerInfo.email}`,
-                          payment_method: order.stripeToken,
-                          confirm: true,
-                        });
-                        res.status(200).json(
-                            {paymentInfo: {
-                                id: payment.id,
-                                amount: payment.amount,
-                                status: payment.status
-                            }}
-                        )
-                      } catch (error) {
-                        res.status(500).send(error);
-                      }
-                }else {
-                    res.status(200).json(
-                        {availableQuants: availableQuants}
-                    )
+                if(availableQuants.length != order.cartItems.length) {
+                    let unAvailableItems:CartItem[] = []
+                    order.cartItems.forEach(cartItem => {
+                        if(!(availableQuants.find(i => i.id === cartItem.id && i.size === cartItem.size))) {
+                            unAvailableItems.push(cartItem)
+                        }
+                    });
+                    console.log('server unavailable', unAvailableItems)
+                    res.status(404).json(unAvailableItems)
                 }
+                if(availableQuants.length == order.cartItems.length) {
+                    if(isSufficientInventory(availableQuants)) {
+                        let price = await calcPrice(order.cartItems);
+                        await updateQuantities(order.cartItems);
+                        try {
+                            const payment = await stripe.paymentIntents.create({
+                              amount: price * 100,
+                              currency: "USD",
+                              description: `${order.buyerInfo.firstname} ${order.buyerInfo.lastname} ${order.buyerInfo.email}`,
+                              payment_method: order.stripeToken,
+                              confirm: true,
+                            });
+                            res.status(200).json(
+                                {paymentInfo: {
+                                    id: payment.id,
+                                    amount: payment.amount,
+                                    status: payment.status
+                                }}
+                            )
+                          } catch (error) {
+                            res.status(500).send(error);
+                          }
+                    }else {
+                        res.status(200).json(
+                            {availableQuants: availableQuants}
+                        )
+                    }
+                }
+             
 
             } else {
                 res.status(400).send('missing data in order object')

@@ -1,5 +1,5 @@
 
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { Item, NewItem, APIMessage, Order } from "../types";
 export const getStoreItems = async (): Promise<Item[]> => {
     try {
@@ -79,6 +79,9 @@ export const processPayment = async (order: Order): Promise<any> => {
         });
         return response;
     } catch (e:any) {
+if(e.response.status === 404) {
+    return {data: {unAvailableItems: e.response.data}, status: 404}
+}
         return {message: e.response.data}
     }
 }
